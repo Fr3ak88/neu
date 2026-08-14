@@ -177,6 +177,11 @@ async function checkProgress() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.search.indexOf('syncing=1') !== -1) {
+        freshSync = true;
+        syncProgress.style.display = 'block';
+        syncBtn.disabled = true;
+    }
     startPolling();
     checkProgress();
 });

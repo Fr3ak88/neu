@@ -79,7 +79,8 @@ class FbaInventoryController extends Controller
         \App\Jobs\SyncFbaInventoryJob::dispatch($account);
 
         return redirect()->route('fba-inventory.index')
-            ->with('success', 'Inventory-Synchronisation gestartet…');
+            ->with('success', 'Inventory-Synchronisation gestartet…')
+            ->withQuery(['syncing' => '1']);
     }
 
     public function syncProgress()
