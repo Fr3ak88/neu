@@ -113,12 +113,10 @@ const progressSkus = document.getElementById('progressSkus');
 const syncErrorText = document.getElementById('syncErrorText');
 const syncBtn = document.getElementById('syncBtn');
 let pollInterval = null;
+let firstCheck = true;
 
 function startPolling() {
     if (pollInterval) return;
-    syncProgress.style.display = 'block';
-    syncError.style.display = 'none';
-    syncBtn.disabled = true;
     pollInterval = setInterval(checkProgress, 2000);
 }
 
@@ -143,21 +141,17 @@ async function checkProgress() {
 
         if (data.status === 'none') {
             syncProgress.style.display = 'none';
-            stopPolling();
+            if (firstCheck) stopPolling();
+            firstCheck = false;
             return;
         }
 
-        if (data.status === 'running' || data.status === 'pending') {
-            const pct = data.fetched_skus > 0 ? Math.min(Math.round((data.fetched_skus / Math.max(data.total_skus || 1, data.fetched_skus + 50)) * 100), 99) : 0;
-            progressBar.style.width = pct + '%';
-            progressText.textContent = data.status === 'pending' ? 'Warte auf Verarbeitung…' : 'Seite ' + data.current_page + ' abgerufen…';
-            progressPercent.textContent = pct + '%';
-            progressSkus.textContent = data.fetched_skus + ' SKUs abgerufen';
-            return;
-        }
+        firstCheck = false;
+        syncBtn.disabled = true;
 
         if (data.status === 'completed') {
             stopPolling();
+            syncProgress.style.display = 'block';
             progressBar.style.width = '100%';
             progressPercent.textContent = '100%';
             progressText.textContent = 'Synchronisation abgeschlossen!';
@@ -171,6 +165,19 @@ async function checkProgress() {
             syncProgress.style.display = 'none';
             syncError.style.display = 'block';
             syncErrorText.textContent = 'Synchronisation fehlgeschlagen: ' + (data.error || 'Unbekannter Fehler');
+            return;
+        }
+
+        if (data.status === 'running' || data.status === 'pending') {
+            syncProgress.style.display = 'block';
+            syncError.style.display = 'none';
+
+            const pct = data.fetched_skus > 0 ? Math.min(Math.round((data.fetched_skus / Math.max(data.total_skus || 1, data.fetched_skus + 50)) * 100), 99) : 0;
+            progressBar.style.width = pct + '%';
+            progressText.textContent = data.status === 'pending' ? 'Warte auf Verarbeitung…' : 'Seite ' + data.current_page + ' abgerufen…';
+            progressPercent.textContent = pct + '%';
+            progressSkus.textContent = data.fetched_skus + ' SKUs abgerufen';
+            return;
         }
     } catch (e) {
         // Ignore polling errors
@@ -178,6 +185,7 @@ async function checkProgress() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    startPolling();
     checkProgress();
 });
 </script>
