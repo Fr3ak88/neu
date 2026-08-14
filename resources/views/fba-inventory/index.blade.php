@@ -21,19 +21,6 @@
     </form>
 </div>
 
-@if(Session::has('success'))
-    <div class="alert alert-ok">
-        <i data-lucide="check-circle" width="18" height="18" class="alert-icon"></i>
-        <div>{{ Session::get('success') }}</div>
-    </div>
-@endif
-@if(Session::has('error'))
-    <div class="alert alert-error">
-        <i data-lucide="alert-triangle" width="18" height="18" class="alert-icon"></i>
-        <div>{{ Session::get('error') }}</div>
-    </div>
-@endif
-
 <div id="syncProgress" style="display:none;margin-bottom:var(--space-4)">
     <div class="card">
         <div class="card-title"><i data-lucide="loader" width="16" height="16" class="spin"></i> Synchronisation läuft…</div>
