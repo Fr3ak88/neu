@@ -1,0 +1,4964 @@
+﻿REST Schnittstellen Dokumentation
+
+REST Interface
+
+Version 2.9.12
+
+The following XML files reflect the standard interface. In addition to this, further individual data
+
+can be read into storelogix and also be exported from storelogix after coordination.
+
+Table of content
+
+History
+
+Data to storelogix
+
+Login and Access-Token
+
+Request a new token
+
+Client informations -> storelogix
+
+REST-Call
+
+XML-body structure
+
+Json body
+
+Description
+
+Article data -> storelogix
+
+REST-Call
+
+XML-body structure
+
+Json body
+
+Description
+
+Response
+
+XML-Body structure
+
+Description
+
+Delivery orders -> storelogix
+
+Communication process
+
+REST-Call
+
+XML-Body structure
+
+JSON-Body structure
+
+Description
+
+Delivery Order
+
+Trading
+
+Address (Trading Partner)
+
+Invoicing
+
+Address (Invoice)
+
+Shipping
+
+Address (Shipping)
+
+Documents
+
+Items
+
+
+
+Value Added Services
+
+Response
+
+XML-Body structure
+
+JSON-Body structure
+
+Description
+
+Purchase order  -> storelogix
+
+Communication process
+
+REST-Call
+
+XML-Structure
+
+JSON-Structure
+
+Description
+
+Response
+
+XML-Body structure
+
+JSON-Body structure
+
+Incoming Goods -> storelogix
+
+Communication process
+
+REST-Call
+
+XML-Structure
+
+Description
+
+Returns Notification -> storelogix
+
+Kommunikationsablauf
+
+REST-Call
+
+XML-Aufbau
+
+Description
+
+Response
+
+XML-Body structure
+
+JSON-Body structure
+
+Feedback from storelogix
+
+Orders
+
+Orders/Jobs
+
+Changes in Inventories
+
+Stock
+
+Pull Feedback Messages
+
+REST-Call
+
+Order status
+
+XML-Structure
+
+JSON-Structure
+
+Descripton
+
+Order completed
+
+As independet feedback
+
+XML-Structure
+
+JSON-Structure
+
+Description
+
+Order cancelled
+
+As independent feedback
+
+XML-Structure
+
+
+
+JSON-Structure
+
+Description
+
+Goods accepted
+
+XML-Structure
+
+JSON-Structure
+
+Description
+
+Return accepted
+
+XML-Structure
+
+Description
+
+Change in the status of the receipted return items
+
+XML-Aufbau
+
+Description
+
+Purchase order fully completed
+
+XML-Structure
+
+JSON-Structure
+
+Description
+
+Unplanned change in stock
+
+XML-Structure
+
+Description
+
+Stock or inventory confirmation
+
+REST call:
+
+XML-Structure
+
+Description
+
+History
+
+Version Datum Änderungen
+
+(JJ.MM.TT)
+
+2.9.12 2026-03-17 <BARCODE_COLLI>  + (unter
+
+Article_Collis)
+
+<IS_TEXT>  + (unter Article_Info)
+
+<Quality>  + (Stock or inventory
+
+confirmation)
+
+If “IncludeQualities=true” the stock-
+
+counts… +
+
+2.9.11 2026-03-06 <Item>.<ShippingService>
+
+<Item>.<ParentPosNumber>
+
+2.9.8 2025-08-08 <PosReferenze>  in order request and
+
+response; <PosReferenze>  in purchase
+
+order request and response; 
+
+
+
+<ARTICLE_EXPORT_DESCRIPTION>  in
+
+articles
+
+2.9.7 2025-08-07 –
+
+2.9.6 2025-08-05 <CustomsTariffNo>  in … (Angabe im
+
+Text abgeschnitten)
+
+2.9.5 2025-06-10 <Content>  in <Document>
+
+2.9.4 2025-05-14 BBD in purchase order pos.; SSCC and HU
+
+number in purchase order pos.; Project id
+
+in purchase order and pos.; Cost center in
+
+purchase order
+
+2.9 2025-04-04 create_client ; Add parameter in 
+
+create_orders ; <TraderName>  in
+
+order; <Source>  in order Responses;
+
+Returns Notification
+
+2.6.1 2024-06-17 <PosReferenze>  in 
+
+<DeliveryOrder>
+
+2.6 2024-05-29 REST Call _get_response_ ; 
+
+<ARTICLE_SET_PARTS>  in 
+
+<ARTICLES> ; <Document>  in delivery
+
+orders
+
+2.5 2024-01-02 Same text changes
+
+2.3 2023-09-02 Add json
+
+2.2 2022-05-02 First version
+
+Data to storelogix
+
+Login and Access-Token
+
+Each REST communication is secured with Basic Authentication according to RFC 2617, the
+
+access data are individually defined for each participant.
+
+
+
+Each REST request requires an access token, which is obtained by logging in to the rest server
+
+with the respective access data.
+
+Each request runs in its own transaction, so the tokens cannot be used in parallel in several
+
+requests.
+
+If a token is nevertheless used in parallel, all subsequent requests wait in the order of the calls
+
+until the respective previous transaction has been completed.
+
+Request a new token
+
+GET
+
+https://api.storelogix.de:<Port>/REST/Order/Login?username=<UserID>&password=
+
+<Password>
+
+or
+
+https://api.storelogix.de:<Port>/REST/Article/Login?username=<UserID>&password=
+
+<Password>
+
+<UserID> and <Password> are assigned separately per connection.
+
+If for security reasons the login data must not be included in the URL, this can be passed in the
+
+http header under "SessionAuth" as <UserID>;<Password>:
+
+SessionAuth: IFC-TEST;hretg87#z
+
+If the login was successful, a json structure with the new access token is returned:
+
+1 {
+2 "ErrorCode": 0,
+3 "Message": "",
+4 "AccessToken": "E588B8F1-6B3A-438E-A2C7-977678DA6711",
+5 "TokenType": "AccessToken",
+6 "ExpiresIn": 360
+7 }
+
+If the login fails, "ErrorCode" <> 0 and an error message is returned in "Message".
+
+The returned access token is valid for up to "ExpiresIn" value and can be used for all further
+
+REST requests.
+
+
+
+Client informations -> storelogix
+
+REST-Call
+
+POST
+
+<https://api.storelogix.de:<Port>>/REST/Client/create_client?AccessToken=<AccessToken>
+
+If for security reasons the login data must not be included in the URL, they can be passed in the
+
+http header under "AccessToken":
+
+XML-body structure
+
+1 <ClientInfo>
+2 <Master>
+3 <Client>
+4 <ClientName>
+5 <ReturnInstruction>
+6 <GLN>
+7 <VAT>
+8 <EORI>
+9
+10 <ClientAddress>
+11 <Company>
+12 <NameAddition>
+13 <Street>
+14 <StreetAddition>
+15 <PostCode>
+16 <City>
+17 <State>
+18 <CountryCode>
+19 <Email>
+20 <Phone>
+21 <Contact>
+22 </ClientAddress>
+23
+24 </ClientInfo>
+
+Json body
+
+json is currently not supported for this
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, D=Date (yyyy-mm-dd)
+
+L = Maximum field length F=Decimal number
+
+Tag P T L Description
+
+
+
+<ClientInfo> Information about the client
+
+<Master> Y S 64 Unique name of the main client
+
+<Client> Y S 64 Unique name of the client
+
+<ClientName N S 64 Name of the client
+
+>
+
+<ReturnInstr N S 128 Instructions for returns acceptance,
+
+uction> valid for this client
+
+<GLN> N S 16 GLN (Global Location Number) of
+
+the client
+
+<VAT n S 16 Tax number of the client
+
+<EORI> N S 16 Customs number of the client
+
+<ClientAddr Address of the client
+
+ess>
+
+<Company> Y S 64 Company
+
+<NameAdditi n S 64 Addition to the name
+
+on>
+
+<Street> Y S 64 Street
+
+<PostCode> Y S 16 Post code
+
+<City> Y S 64 City
+
+<CountryCod N S 3 Country according to ISO 3166, if
+
+e> empty then DE
+
+<Email> N S 64 eMail address in the form 
+
+name@adress.domain
+
+<Phone> N S 64 Phone number
+
+
+
+Article data -> storelogix
+
+REST-Call
+
+POST
+
+https://api.storelogix.de:<Port>/REST/Article/insert_article?AccessToken=
+
+<AccessToken>&Client=<ClientName>
+
+If for security reasons the login data must not be included in the URL, they can be passed in the
+
+http header under "AccessToken":
+
+XML-body structure
+
+1 <ARTICLES>
+2 <ARTICLE>
+3 <ARTICLE_INFO>
+4 <STATUS>
+5 <CLIENT>
+6 <TRADER>
+7 <ARTICLE_NR>
+8 <ARTICLE_ADD_NR>
+9 <MANUFACTOR>
+10 <MANUFACTOR_NR>
+11 <MANUFACTOR_ARTICLE_NR>
+12 <CUSTOMER_ARTICLE_NR>
+13 <BRAND>
+14 <GROUP>
+15 <COUNTRY_OF_ORIGIN>
+16 <PICTURE_PATH>
+17 <BBD_TYPE>
+18 <BBD_REM_IN>
+19 <BBD_REM_OUT>
+20 <BBD_REM_PICK>
+21 <LOT_TYPE>
+22 <SERIAL_DUTY>
+23 <CUSTOMS_TARIFF_NR>
+24 <MINIMAL_PICKING_STOCK_AMOUNT>
+25
+26 <ARTICLE_UNITS>
+27 <ARTICLE_UNIT>
+28 <UNIT_TYPE>
+29 <UNIT_VARIANT>
+30 <UNIT_DESCRIPTION>
+31 <UNIT_BULKY>
+32 <UNIT_BIG_ITEM>
+33 <UNIT_READY_TO_SEND>
+34 <UNIT_CONTENT_ARTICLE_NR>
+35 <UNIT_CONTENT_UNIT_TYPE>
+36 <UNIT_CONTENT_COUNT>
+37 <UNIT_PER_PALLET>
+38 <UNIT_PER_LAYER>
+39 <UNIT_EAN13>
+40 <UNIT_BARCODE>
+41 <UNIT_LENGTH>
+42 <UNIT_WIDTH>
+43 <UNIT_HEIGHT>
+44 <UNIT_WEIGHT_NET>
+45 <UNIT_WEIGHT_GROSS>
+46 <UNIT_SIZE>
+47 <UNIT_COLOR>
+48 <UNIT_PRICE_NET>
+49 <UNIT_TAX>
+
+
+
+50 <UNIT_PRICE_GROSS>
+51 <ARTICLE_COLLIS>
+52 <COLLI_NUMBER>
+53 <COLLI_DESCRIPTION>
+54 <COLLI_BULKY>
+55 <COLLI_READY_TO_SEND>
+56 <COLLI_EAN13>
+57 <COLLI_BARCODE>
+58 <COLLI_LENGTH>
+59 <COLLI_WIDTH>
+60 <COLLI_HEIGH>
+61 <COLLI_WEIGHT_NET>
+62 <COLLI_WEIGHT_GROSS>
+63 </ARTICLE_COLLIS>
+64
+65 <ARTICLE_SET_PARTS>
+66 <ARTICLE_SET_DESCRIPTION>
+67 <IS_MANUFACTURING_SET>
+68 <ARTICLE_SET_PART>
+69 <UNIT_VARIANT>
+70 <ARTICLE_NR>
+71 <UNIT_TYPE>
+72 <AMOUNT>
+73 </ARTICLE_SET_PART>
+74 </ARTICLE_SET_PARTS>
+75 </ARTICLE_UNIT>
+76                     ...
+77 </ARTICLE_UNITS>
+78
+79 <ARTICLE_TEXTS>
+80 <ARTICLE_TEXT>
+81 <LANGUAGE>
+82 <ARTICLE_SHORT_TEXT>
+83 <ARTICLE_LONG_TEXT>
+84 <ARTICLE_INFOS>
+85 <ARTICLE_HINT>
+86 <ARTICLE_PICK_HINT>
+87 <ARTICLE_PACK_HINT>
+88 <ARTICLE_DELIVERY_HINT>
+89 <ARTICLE_EXPORT_DESCRIPTION>
+90 </ARTICLE_TEXT>
+91                     ...
+92 <ARTICLE_TEXTS>
+93
+94 <ASSORTMENTS>
+95 <ASSORTMENT>
+96 </ASSORTMENT>
+97
+98 <HAZARDOUS_MATERIALS>
+99 <HAZARDOUS_MATERIAL>
+100 <UN_NUMBER>
+101 <CLASS>
+102 <DESCRIPTION>
+103 </HAZARDOUS_MATERIAL>
+104 </HAZARDOUS_MATERIALS>
+105
+106 </ARTICLE_INFO>
+107 </ARTICLE>
+108 </ARTICLES>
+
+Json body
+
+1 {
+2 "article": {
+
+
+
+3 "article_info": {
+4 "status": ,
+5 "client": ,
+6 "trader": ,
+7 "article_nr": ,
+8 "article_add_nr": ,
+9 "manufactor": ,
+10 "manufactor_nr": ,
+11 "manufactor_article_nr": ,
+12 "customer_article_nr": ,
+13 "brand": ,
+14 "group": ,
+15 "country_of_origin": ,
+16 "picture_path": ,
+17 "bbd_type": ,
+18 "bbd_rem_in": ,
+19 "bbd_rem_out": ,
+20 "bbd_rem_pick": ,
+21 "lot_type": ,
+22 "serial_duty": ,
+23 "is_flyer": ,
+24 "customs_tariff_nr": ,
+25 "minimal_picking_stock_amount": ,
+26
+27 "article_units": [
+28 {
+29 "unit_type": ,
+30 "unit_variant": ,
+31 "unit_description": ,
+32 "unit_bulky": ,
+33 "unit_big_item": ,
+34 "unit_content_article_nr": ,
+35 "unit_content_unit_type": ,
+36 "unit_content_count": ,
+37 "unit_per_pallet": ,
+38 "unit_per_layer": ,
+39 "unit_ean13": ,
+40 "unit_barcode": ,
+41 "unit_length": ,
+42 "unit_width": ,
+43 "unit_height": ,
+44 "unit_weight_net": ,
+45 "unit_weight_gross": ,
+46 "unit_size": ,
+47 "unit_color": ,
+48 "unit_price_net": ,
+49 "unit_tax": ,
+50           "unit_price_gross:
+51 }
+52 ],
+53
+54 "article_texts": [
+55 {
+56 "language": ,
+57 "article_short_text": ,
+58 "article_long_text": ,
+59 "article_infos": ,
+60           "article_hint:
+61 }
+62 ]
+63 }
+64 }
+65 }
+66
+
+
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, D=Date (yyyy-mm-dd)
+
+L = Maximum field length F=Decimal number
+
+Tag R T L Description
+
+<ARTICLE_INFO> Article basic info
+
+<STATUS> Y C 1 Status:
+
+N: New
+
+U: Update
+
+D: Delete
+
+<CLIENT> N S 32 The article belongs to this subclient, if empty,
+
+the article is assigned to the warehouse client
+
+<TRADER> N S 64 Seller or trading partner of the goods
+
+<ARTICLE_NR> Y S 64 Unique article number
+
+<ARTICLE_ADD_NR> N S 64 Additional article number
+
+<MANUFACTOR> N S 64 Manufacturer of the article
+
+<MANUFACTOR_NR> N S 64 Manufacturer number
+
+<MANUFACTOR_ARTIC N S 64 Article number of the manufacturer
+
+LE_NR>
+
+<CUSTOMER_ARTICLE N S 64 Customer's article number (only useful for
+
+_NR> Fulfillment service providers)
+
+<BRAND> N S 32 Manufacturer brand
+
+<GROUP> N S 128 Article group, can be specified as hierarchy, then
+
+separated with ;.
+
+<COUNTRY_OF_ORIGI N S 2 Country of origin as ISO 3166
+
+N>
+
+
+
+<PICTURE_PATH> N S 256 A URL for the matching image, http:// or https://
+
+<BBD_TYPE> N C 1 If the article is managed with BBD
+
+N = No
+
+BBD = Best before date 
+
+UBD = Use-by date 
+
+EXP = expiration date (medical products only)
+
+<BBD_REM_IN> N I 5 The required minimum remaining time at goods
+
+receipt, only for BBD articles
+
+<BBD_REM_OUT> N I 5 The required minimum remaining time on
+
+delivery, only for BBD articles.
+
+<BBD_REM_PICK> N I 5 The required minimum remaining time for
+
+picking, only for BBD articles. That allows to
+
+override <BBD_REM_OUT>.
+
+<LOT_TYPE> N C 1 1 Must a lot number be kept for the article
+
+N = No
+
+O = Optional, the lot number can be recorded
+
+P = Lot obligation, the lot number must be
+
+indicated
+
+<SERIAL_DUTY> N C 1 The article must have a serial number recorded
+
+upon delivery, Y=Yes, N=No
+
+<IS_FLYER> N C 1 The article is a shipping flyer, Y=Yes, N=No
+
+<IS_TEXT> N C 1 The article is a text only, Y=Yes, N=No
+
+<CUSTOMS_TARIFF_N n S 32 Custom tariff number
+
+R>
+
+<ARTICLE_UNITS> Units of the article, can occur several times
+
+<ARTICLE_UNIT> At least one unit must be specified
+
+<UNIT_TYPE> Y S 16 Unit designation, e.g., ST or KA, must be unique
+
+<UNIT_VARIANT> N S 32 ID of this variant, must be unique also across all
+
+other units. If no ID is specified, the
+
+ARTICLE_NR must be unique
+
+
+
+<UNIT_DESCRIPTION> N S 32 Unit description
+
+<UNIT_BULKY> N C 1 Ship unit as bulky goods
+
+<UNIT_BIG_ITEM> N C 1 Unit is a big item, but not bulky goods Y/N
+
+<UNIT_READY_TO_SEN N C 1 Wether unit can be shipped without packaging,
+
+D> Y=Yes, N=No
+
+<UNIT_CONTENT_ARTI N C 64 Article no. of the content article
+
+CLE_NR>
+
+<UNIT_CONTENT_UNI n C 32 Unit of the content article
+
+T_TYPE>
+
+<UNIT_CONTENT_COU N I 5 Number of content articles
+
+NT>
+
+<UNIT_PER_PALLET> N I 5 Number of units per pallet
+
+<UNIT_PER_LAYER> N I 5 Number of units per layer
+
+<UNIT_EAN13> N S 128 EAN13 of the unit, these should be unique per
+
+client.
+
+If there are several different EANs for this unit,
+
+then these can be specified separated with ,
+
+<UNIT_BARCODE> N S 32 Barcode of the unit, in contrast to EAN13 neither
+
+length nor format must be considered here
+
+<UNIT_LENGTH> N I 5 Length of the unit in mm, can be empty for
+
+multicolli
+
+<UNIT_WIDTH> N I 5 Width of the unit in mm, can be empty for
+
+multicolli
+
+<UNIT_HEIGHT> N I 5 Height of the unit in mm, can be empty for
+
+multicolli
+
+When the dimensions are transferred, they are
+
+automatically sorted so that the largest value is
+
+the length, and the smallest value is the height.
+
+<UNIT_WEIGHT_NET> N I 7 Net weight of the unit in grams, can be empty for
+
+multicolli
+
+
+
+<UNIT_WEIGHT_GROS N I 7 Gross weight of the unit in grams, can be empty
+
+S> for multicolli.
+
+The tare weight of the unit is determined from
+
+the difference between net weight and gross
+
+weight
+
+<UNIT_PRICE_NET> N F 5.3 Net sales price of the unit in euros
+
+<UNIT_TAX> N F 5.1 Tax rate in %, e.g., 19 for 19%.
+
+<UNIT_PRICE_GROSS> N F 5.3 Gross sales price of the unit in euros
+
+<ARTICLE_COLLIS> N Collis of the unit, can occur more than once.
+
+The number must <COUNT_OF_COLLIS>
+
+match
+
+<ARTICLE_COLLI> This information is optional.
+
+<COLLI_NUMBER> Y I 5 Unique Colli Number 
+
+<COLLI_DESCRIPTION Y S 32 Name of Collis
+
+>
+
+<COLLI_BULKY> N C 1 Sending a parcel as bulky goods Y/N
+
+<COLLI_READY_TO_SE N C 1 Colli is already packed ready for shipment Y/N
+
+ND>
+
+<COLLI_EAN13> N S 32 EAN of the Collis, the EAN must be unique per
+
+Colli and client If there are several different
+
+EANs for this unit, then they can be deprecated
+
+with , or ; be specified separately
+
+<COLLI_BARCODE> N S 32 Barcode of the Colli, in contrast to EAN13 neither
+
+format must be considered here
+
+<COLLI_LENGTH> N I 5 Length of the collis in mm
+
+<COLLI_WIDTH> N I 5 Width of the collis in mm
+
+<COLLI_HEIGH> N I 5 Height of the collis in mm
+
+When the dimensions are adopted, they are
+
+automatically sorted so that the largest value
+
+
+
+represents the length and the smallest value
+
+represents the height..
+
+<COLLI_WEIGHT_NET N I 7 Net weight of the collis in grams
+
+>
+
+<COLLI_WEIGHT_GRO N I 7 Gross weight of the collis in grams, the tare is
+
+SS> determined from the difference between net and
+
+gross.
+
+<ARTICLE_SET_PARTS N Set definition
+
+>
+
+<ARTICLE_SET_DESCR N S 64 Article set Description
+
+IPTION>
+
+<IS_MANUFACTURING N C 1 Controls the resolution of the set
+
+_SET> 0 : Is always exploded, default value
+
+1 : Set is exploded for production orders, but
+
+not for picking
+
+<ARTICLE_SET_PART> N The individual set components can occur more
+
+than once. Either the <UNIT_VARIANT> or
+
+<ARTICLE_NR> and <UNIT_TYPE> must be
+
+specified. The contained set components must
+
+already be known beforehand.
+
+<UNIT_VARIANT> N S 32 Variant ID of the set component
+
+<ARTICLE_NR> N S 32 Article number of the set component, not in
+
+combination with <UNIT_VARIANT>
+
+<UNIT_TYPE> N S 32 Unit designation of the set component, not in
+
+combination with <UNIT_VARIANT>
+
+<AMOUNT> Y N 32 Quantity included in the set
+
+<ARTICLE_TEXTS> Y Texts for the article.
+
+<ARTICLE_TEXT> Y May occur multiple times with different language
+
+in <LANGUAGE>. At least one language must be
+
+specified.
+
+
+
+<LANGUAGE> Y S 3 Language of texts according to ISO 639, default
+
+DE
+
+DE : German
+
+EN: English
+
+FR: France
+
+<ARTICLE_SHORT_TEX Y S 128 Short text
+
+T>
+
+<ARTICLE_LONG_TEXT N S 1024 Long text
+
+>
+
+<ARTICLE_INFOS> N S 1024 Additional article info
+
+<ARTICLE_HINT> N S 1024 More additional article info
+
+<ARTICLE_PICK_HINT N S 128 Note text during order picking
+
+>
+
+<ARTICLE_PACK_HINT N S 128 Note text during packaging
+
+>
+
+<ARTICLE_DELIVERY_ N S 128 Note text for sending
+
+HINT>
+
+<ARTICLE_EXPORT_DE N S 128 Note text for customs declaration
+
+SCRIPTION>
+
+<ASSORTMENTS> N Assortment indicator of the article A whole list
+
+can be specified
+
+<ASSORTMENT> N S 32 Mark for the assortment to which the article
+
+belongs: e.g.
+
+FSK : If proof of age is required
+
+TK : Frozen product
+
+<HAZARDOUS_MATERI N UN numbers, also known as substance numbers,
+
+ALS> of this Article
+
+<HAZARDOUS_MATERI A whole list can be specified
+
+AL>
+
+
+
+<UN_NUMBER> Y N UN number (substance numbers) that belongs to
+
+the article, e.g. 
+
+UN 3090: Lithium-ion batteries
+
+UN 3091: Lithium-ion batteries in equipment
+
+UN 3480: Lithium-ion batteries
+
+UN 3481: Lithium-ion batteries in equipment
+
+UN 1057: Lighters UN 1950: Lighter Gas
+
+UN 2037: Camping Gaz Cartridges
+
+<UN_DESCRIPTION> N S 64 Description for the UN number
+
+<CLASS> N N Hazard class of this UN number (1..9)
+
+Response
+
+XML-Body structure
+
+1 <ArticleResponse>
+2 <Client>
+3 <ArticleStatus>
+4 <ArticleNumber>
+5 <ErrorText>
+6 <ProcessTimestamp>
+7 </ ArticleResponse >
+
+Description
+
+R = Required field  Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag R L Description
+
+
+
+<ArticleRespon
+
+se>
+
+<Client> S 32 Client or
+
+subclient
+
+<ArticleStatus> S 16 Status of the
+
+data transfer:
+
+ifcerror: The data
+
+could not be
+
+transferred;
+
+received: Data
+
+successfully
+
+transferred
+
+<ArticleNumber S 32 <ARTICLE_NR>
+
+> from <ARTICLE>
+
+<ARTICLE_INFO
+
+>
+
+<ErrorText> S 64 In case of
+
+status=ifcerror
+
+here is the cause
+
+of the error
+
+<ProcessTimesta T Time stamp of
+
+mp> the process
+
+Delivery orders -> storelogix
+
+Communication process
+
+External Process Storelogix
+
+Order transfer
+
+DeliveryOrder ->
+
+
+
+<- If everything is ok
+
+DeliveryOrderResponse, Status = received
+
+If an error was detected
+
+DeliveryOrderResponse Status = ifcerror and ErrorText =<Ursache>
+
+Order is scheduled
+
+Only status, no items
+
+<- DeliveryOrderResponse, Status = planed
+
+Picking begins
+
+Only status, no items
+
+<- DeliveryOrderResponse, Status = picking
+
+Packing begins
+
+Only status, no items
+
+<- DeliveryOrderResponse, Status = packing
+
+Packing of the order is finished
+
+Only status, no items
+
+<- DeliveryOrderResponse, Status = finished
+
+Order was shipped
+
+Here all items and packages are returned <-
+
+DeliveryOrderResponse, Status = shipped
+
+Order was canceled in storelogix
+
+
+
+All items are returned with quantity=0 <-
+
+DeliveryOrderResponse, Status = canceled, CancellationReason=<Ursache>
+
+REST-Call
+
+POST
+
+https://api.storelogix.de:<Port>/REST/Order/insert_order?AccessToken=
+
+<AccessToken>&Client=<ClientName>
+
+If for security reasons the login data must not be included in the URL, they can be passed in the
+
+http header under "AccessToken":
+
+XML-Body structure
+
+1 <DeliveryOrders>
+2 <DeliveryOrder>
+3 <Location>
+4 <Warehouse>
+5 <Client>
+6 <Source>
+7 <Locked>
+8 <OrderNumber>
+9 <OrderReferenz>
+10 <OrderCommNumber>
+11 <OrderProcessNumber>
+12 <OrderCostCenter>
+13 <OrderType>
+14 <PurchaseDate>
+15 <PurchaseNumber>
+16 <DeliveryNoteNumber>
+17 <InvoiceNumber>
+18 <OrderDate>
+19 <ShippingDate>
+20 <DeliveryDate>
+21 <DeliveryTime>
+22 <DeliveryHint>
+23 <PickingHint>
+24 <PackingHint>
+25 <CustomerNumber>
+26 <CustomerOrderNumber>
+27 <LanguageCode> <Priority>
+28 <FieldSalesStuff>
+29 <OfficeSalesStuff>
+30 <OrderIndicater>
+31 <ProjectID>
+32 <PartialDeliveryAllowed>
+33
+34 <Trading>
+35 <TraderName>
+36 <TraderOrderNumber>
+37 <TraderPurchaseNumber>
+38 <Address>
+39 <Salutation>
+
+
+
+40 <Company>
+41 <Name1>
+42 <Name2>
+43 <Street>
+44 <StreetAddition>
+45 <PostCode>
+46 <City>
+47 <State>
+48 <CountryCode>
+49 <Email>
+50 <Phone>
+51 <LanguageCode>
+52 <GLN>
+53 <VAT>
+54 <EORI>
+55 </Address>
+56 </Trading>
+57
+58 <Invoicing>
+59 <InvoiceNumber>
+60 <InvoiceCurrency>
+61 <InvoiceAmountNet>
+62 <InvoiceAmountGross>
+63 <InvoiceVATAmount>
+64 <Address>
+65 <Salutation>
+66 <Company>
+67 <Name1>
+68 <Name2>
+69 <Street>
+70 <HouseNumber>
+71 <StreetAddition>
+72 <PostCode>
+73 <City>
+74 <State>
+75 <CountryCode>
+76 <Email>
+77 <Phone>
+78 <LanguageCode>
+79 <GLN> <VAT>
+80 <EORI>
+81 </Address>
+82 </Invoicing>
+83
+84 <Shipping>
+85 <Service>
+86 <ServiceOptions>
+87 <TourNumber>
+88 <TourIndex>
+89 <ShippingRules>
+90 <ShippingHint>
+91 <ShippingDate>
+92 <ShippingNotify>
+93 <ShippingIncoterm>
+94 <ShippingContainer>
+95 <PackageType>
+96 <Address>
+97 <Salutation>
+98 <Company>
+99 <Name1>
+100 <Name2>
+101 <Street>
+102 <HouseNumber>
+103 <StreetAddition>
+104 <PackingStation>
+105 <PostCode>
+106 <City>
+
+
+
+107 <State>
+108 <CountryCode>
+109 <Email>
+110 <Phone>
+111 <LanguageCode>
+112 <GLN>
+113 <VAT>
+114 <EORI>
+115 </Address>
+116 </Shipping>
+117
+118 <Documents>
+119 <Document>
+120 <FileName>
+121 <FileType>
+122 <DocumentType>
+123 <PrinterType>
+124 <PrintingStep>
+125 <Content>
+126 <Data>
+127 </Content>
+128 </Document>
+129 </Documents>
+130
+131 <Items>
+132 <Item>
+133 <PosNumber>
+134 <ParentPosNumber>
+135 <PosReferenze>
+136 <ItemNo>
+137 <CustomItemNo>
+138 <ItemVariant>
+139 <DeliveryItemNo>
+140 <EAN>
+141 <ItemUnit>
+142 <Quantity>
+143 <MinimumWeight>
+144 <BBDRemTime>
+145 <BBDMinimal>
+146 <BBDFix>
+147 <RequiredLot>
+148 <RequiredQuality>
+149 <ArticleText>
+150 <InfoText>
+151 <ExportDeclaration>
+152 <CustomsTariffNo>
+153 <PickingRules>
+154 <PickingHint>
+155 <ShippingService>
+156 <ShippingRules>
+157 <CrossdockNumber>
+158 <PricePerUnitNet>
+159 <PricePerUnitGross>
+160 <DiscountPerUnitNet>
+161 <VATPerUnit>
+162 <VATPercent>
+163 <PosBarcode>
+164 <UniqueID>
+165
+166 <ValueAddedServices>
+167 <ValueAddedService>
+168 <Service>
+169 <ServiceInfo>
+170 </ValueAddedService>
+171 </ValueAddedServices>
+172
+173 </Item>
+
+
+
+174 </Items>
+175 </DeliveryOrder>
+176 </DeliveryOrders>
+
+JSON-Body structure
+
+1 {
+2   „deliveryorder“: {
+3     „location“: ,
+4     „warehouse“: ,
+5     „client“: ,
+6     „source“: ,
+7     „locked“: ,
+8     „ordernumber“: ,
+9     „orderreferenz“: ,
+10     „ordercommnumber“: ,
+11     „orderprocessnumber“: ,
+12     „ordercostcenter“: ,
+13     „ordertype“: ,
+14     „purchasedate“: ,
+15     „purchasenumber“: ,
+16     „deliverynotenumber“: ,
+17     „orderdate“: ,
+18     „shippingdate“: ,
+19     „deliverydate“: ,
+20     „deliverytime“: ,
+21     „deliveryhint“: ,
+22     „pickinghint“: ,
+23     „packinghint“: ,
+24     „customernumber“: ,
+25     „customerordernumber“: ,
+26     „languagecode“: ,
+27     „priority“: ,
+28     „fieldsalesstuff“: ,
+29     „officesalesstuff“: ,
+30
+31     „trading“: {
+32       „traderordernumber“: ,
+33       „traderpurchasenumber“: ,
+34
+35       „address“: ,
+36 {
+37         „salutation“: ,
+38         „company“: ,
+39         „name1“: ,
+40         „name2“: ,
+41         „street“: ,
+42         „streetaddition“: ,
+43         „postcode“: ,
+44         „city“: ,
+45         „state“: ,
+46         „countrycode“: ,
+47         „email“: ,
+48         „phone“: ,
+49         „languagecode“: ,
+50         „gln“:
+51 }
+52 },
+53
+54     „invoicing“: {
+55       „invoicenumber“: ,
+56       „invoicecurrency“: ,
+57       „invoiceamountnet“: ,
+58       „invoicediscountnet“: ,
+
+
+
+59       „invoicevatamount“: ,
+60
+61       „address“: {
+62         „salutation“: ,
+63         „company“: ,
+64         „name1“: ,
+65         „name2“: ,
+66         „street“: ,
+67         „housenumber“: ,
+68         „streetaddition“: ,
+69         „postcode“: ,
+70         „city“: ,
+71         „state“: ,
+72         „countrycode“: ,
+73         „email“: ,
+74         „phone“: ,
+75         „languagecode“: ,
+76         „gln“:
+77 }
+78 },
+79
+80     „shipping“: {
+81       „service“: ,
+82       „serviceoptions“: ,
+83       „tournumber“: ,
+84       „tourindex“: ,
+85       „shippingrules“: ,
+86       „shippinghint“: ,
+87       „shippingdate“: ,
+88       „shippingcontainer“: ,
+89       „packagetype“: ,
+90
+91       „address“: {
+92         „salutation“: ,
+93         „company“: ,
+94         „name1“: ,
+95         „name2“: ,
+96         „street“: ,
+97         „housenumber“: ,
+98         „streetaddition“: ,
+99         „packingstation“: ,
+100         „postcode“: ,
+101         „city“: ,
+102         „state“: ,
+103         „countrycode“: ,
+104         „email“: ,
+105         „phone“: ,
+106         „languagecode“: ,
+107         „gln“:
+108 }
+109 },
+110
+111     „items“: ,[
+112 {
+113         „posnumber“: ,
+114         „parentposnumber“: ,
+115         „itemno“: ,
+116         „customitemno“: ,
+117         „itemvariant“: ,
+118         „deliveryitemno“: ,
+119         „ean“: ,
+120         „itemunit“: ,
+121         „quantity“: ,
+122         „minimumweight“: ,
+123         „bbdremtime“: ,
+124         „bbdminimal“: ,
+125         „bbdfix“: ,
+
+
+
+126         „requiredlot“: ,
+127         „articletext“: ,
+128         „infotext“: ,
+129         „pickingrules“: ,
+130         „pickinghint“: ,
+131 "shippingservice": ,
+132         „shippingrules“: ,
+133         „crossdocknumber“: ,
+134         „priceperunitnet“: ,
+135         „priceperunitgross“: ,
+136         „discountperunitnet“: ,
+137         „vatperunit“: ,
+138         „vatpercent“: ,
+139         „posbarcode“:
+140 }
+141 ]
+142 }
+143 }
+144
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length F=Decimal number with decimal places
+
+Delivery Order
+
+Tag R T L Description
+
+<DeliveryOrder> Y Order header
+
+<Location> Y S 32 Location
+
+<Warehouse> Y S 32 Warehouse
+
+<Client> N S 32 The order belongs to this subclient, if empty, the
+
+order is assigned to the warehouse client
+
+<Source> N S 32 Source of the order, e.g.: webshop, etc.
+
+<Locked> N C 1 If 1, the order will be locked after the transfer and
+
+thus not processed further for the time being.
+
+
+
+<OrderNumber> Y S 32 Order number, this number must be unique and not
+
+repeated
+
+<OrderReferenz> N S 32 Order reference
+
+<OrderCommNumb N S 32 Commission number of the order
+
+er>
+
+<OrderProcessNum N S 32 Process no. of the order
+
+ber>
+
+<OrderCostCenter> N S 32 Cost center for the order
+
+<OrderType> N S 16 Order type, e.g. NOR, UM, STD etc.
+
+<OrderDate> N D 16 Date of order creation, if empty the current
+
+timestamp will be used
+
+<PurchaseDate> N D 16 Date of order
+
+<PurchaseNumber> N S 32 Order number
+
+<DeliveryNoteNum N S 32 Delivery note no., if none is specified, then the
+
+ber> system generates one automatically.
+
+<ShippingDate> N D 16 Shipment date, if empty the current day is used
+
+<DeliveryDate> N D 16 Delivery date, if empty, the following day is used
+
+<DeliveryTime> N D 16 Delivery date, if empty, the following day is used
+
+<DeliveryHint> N S 64 Hints on the delivery note
+
+<PickingDate> N D 16 Picking date, if empty the current day is used or
+
+calculated according to certain rules
+
+<PickingHint> N S 64 Hints for picking process
+
+<PackingHint> N S 64 Hints for packaging handling
+
+<CustomerNumber N S 32 Customer number
+
+>
+
+<CustomerOrderNu N S 32 Customer order number
+
+mber>
+
+
+
+<LanguageCode> N S 3 Language code according to ISO 639, if empty then
+
+de
+
+<Priority> N I 3 Priority in the processing 1 to 999, the higher the
+
+more preferred the processing runs
+
+<FieldSalesStaff> N S 64 Contact person field service, this can also be a mail
+
+address
+
+<OfficeSalesStaff> N S 64 Contact person office service, this can also be a mail
+
+address
+
+<OrderIndicater> N S 32 Indicator for the order, e.g. CROSS. Used as an
+
+additional selection indicator for order planning.
+
+<ProjectID> N S 32 Defines the project ID of the entire order. Used for
+
+stock selection during order planning.
+
+<PartialDeliveryAllo N C 1 Partial delivery allowed: 0 = No (default), 1 = Yes
+
+wed>
+
+Trading
+
+Tag R T L Description
+
+<Trading> Trading partner details
+
+<TraderName> N S 64 Name of the trading partner
+
+<TraderOrderNumb N S 32 Order number of the trading
+
+er> partner
+
+<TraderPurchaseNu N S 32 Purchase order number of the
+
+mber> trading partner
+
+Address (Trading Partner)
+
+Tag R T L Description
+
+<Address> Address of the trading
+
+partner, e.g. for returns
+
+
+
+<Salutation> N S 16 Salutation
+
+<Company> N S 64 Company
+
+<Name1> Y S 64 First name
+
+<Name2> N S 64 Second name
+
+<Street> Y S 64 Street
+
+<StreetAddition> N S 64 Street Addition
+
+<PostCode> Y S 16 Post code
+
+<City> Y S 64 City
+
+<State> N S 16 State or region within the
+
+country (USA)
+
+<CountryCode> N S 3 Country according to ISO
+
+3166, if empty then DE
+
+<Email> N S 64 eMail address in the form 
+
+name@adress.domain
+
+<Phone> N S 64 Phone number
+
+<LanguageCode> N S 3 Language code according to
+
+ISO 639, if empty then de
+
+<GLN> N S 16 GLN or ILN of the trading
+
+partner
+
+<VAT> N S 16 TIN
+
+<EORI> N S 16 Customs No.
+
+Invoicing
+
+Tag R T L Description
+
+<Invoicing> Invoice details
+
+<InvoiceNumber> N S 32 Invoice number
+
+
+
+<InvoiceCurrency> N S 8 Currency according to ISO
+
+4217. E.g.: EUR, USD, CHF
+
+etc.
+
+<InvoiceAmountNet> N F 7.3 Total invoice amount net
+
+<InvoiceAmountGross N F 7.3 Total invoice amount gross
+
+>
+
+<InvoiceVATAmount> N F 7.3 Total tax amount
+
+Address (Invoice)
+
+Tag R T L Description
+
+<Address> Invoice address
+
+<Salutation> N S 16 Salutation
+
+<Company> N S 64 Company
+
+<Name1> Y S 64 First name
+
+<Name2> N S 64 Second name
+
+<Street> Y S 64 Street
+
+<HouseNumber> N S 8 House number, if it is not already included in
+
+the <street> tag
+
+<StreetAddition> N S 64 Streets addition
+
+<PostCode> Y S 16 Post code
+
+<City> Y S 64 City
+
+<State> N S 16 State or region within the country (USA)
+
+<CountryCode> N S 3 Country according to ISO 3166, if empty then
+
+DE
+
+<Email> N S 64 eMail address in the form 
+
+name@adress.domain
+
+<Phone> N S 64 Phone number
+
+
+
+<LanguageCode> N S 3 Language code according to ISO 639, if empty
+
+then de
+
+<GLN> N S 16 GLN or ILN of the invoice recipient
+
+<VAT> N S 16 TIN
+
+<EORI> N S 16 Customs No.
+
+Shipping
+
+Tag R T L Description
+
+<Shipping> Y Shipping information
+
+<Service> N S 16 Shipper, e.g., DHL, DPD, freight forwarder,
+
+etc.
+
+<ServiceOptions> N S 32 Additional options: COD (Cash on delivery),
+
+EXPRESS (Express delivery)
+
+<TourNumber> N S 16 Number or designation of the delivery tour
+
+<TourIndex> N I 5 Sequence within the tour
+
+<ShippingRules> N S 64 Rules for shipping, e.g., single-variety
+
+SSCCs
+
+<ShippingHint> N S 64 Shipping information
+
+<ShippingDate> N D 16 Shipping date
+
+<ShippingNotify> N S 64 Notes on shipment notification
+
+<ShippingIncoterm> N S 32 Incoterms
+
+<ShippingContainer> N S 32 Shipping load carrier e.g., Euro pallet
+
+<PackageType> N S 32 Packaging type e.g., carton
+
+Address (Shipping)
+
+Tag R T L Description
+
+
+
+<Address> Shipping address, if no address is
+
+specified here, the shipment will be made
+
+to the billing address
+
+<Salutation> N S 16 Salutation
+
+<Company> N S 64 Company
+
+<Name1> Y S 64 First name
+
+<Name2> N S 64 Second name
+
+<Street> Y S 64 Street
+
+<HouseNumber> N S 8 House number, if it is not already included
+
+in the <street> tag
+
+<StreetAddition> N S 64 Street addition
+
+<PackingStation> N S 32 Number of the packing station (DHL)
+
+<PostCode> Y S 16 Post code
+
+<City> Y S 64 City
+
+<State> N S 16 State or region within the country (USA)
+
+<CountryCode> N S 3 Country according to ISO 3166, if empty
+
+then DE
+
+<Email> N S 64 eMail address in the form 
+
+name@adress.domain
+
+<Phone> N S 64 Phone number
+
+<LanguageCode> N S 3 Language code according to ISO 639, if
+
+empty then de
+
+<GLN> N S 16 GLN or ILN of the consignee of the goods
+
+<VAT> N S 16 TIN
+
+<EORI> N S 16 Customs No.
+
+Documents
+
+
+
+Tag R T L Description
+
+<Documents> List of documents belonging
+
+to the order
+
+<Document> Document to be printed
+
+<FileName> N S 64 File name of the document, no
+
+Base64 content!
+
+<FileType> N S 16 Type of file, currently only pdf
+
+or zpl
+
+<DocumentType> N S 16 Type of document, e.g.:
+
+DELIVERY NOTE, SHIPPING
+
+LABEL, FBA, etc.
+
+<PrinterType> N S 16 Output type: LABEL=label
+
+printer, PAGE: plain paper
+
+printer
+
+<PrintingStep> N S 16 When should the document be
+
+printed, currently only PACK, i.e.
+
+when packing.
+
+<Content> N If the content of the document
+
+is to be included directly in the
+
+payload
+
+<Data> N S 1MB Content as base64 encoding
+
+Items
+
+Tag R T L Description
+
+<Items> List of positions
+
+<Item> Position
+
+<PosNumber> N I 7 Position number, must be unique within the order and
+
+must not change during updates
+
+
+
+<ParentPosNumb N I 7 Reference to the higher-level order item
+
+er>
+
+<PosReferenze> N S 32 Position reference, can be used as a unique position ID,
+
+for example
+
+<ItemNo> Y S 64 Article number
+
+<CustomItemNo N S 64 Article number of the client, can be used alternatively
+
+> to <ItemNo>.
+
+<ItemVariant> N S 32 ID of this variant. This ID has priority over the
+
+<ItemNo>.
+
+<DeliveryItemNo N S 64 article number in delivery
+
+>
+
+<ItemUnit> N S 32 Unit to be supplied, if nothing is specified, the only
+
+active unit is assumed
+
+<EAN> N S 14 EAN of the article, alternatively to <ItemNo> or
+
+<ItemVariant>
+
+<Quantity> Y I Quantity to be delivered in units, integer only
+
+<MinimumWeight N F 6,3 The minimum weight to be delivered in kg, if necessary,
+
+> then more than <Quantity> units are reported back
+
+<BBDRemTime> N I 5 Required remaining time on delivery, <BBDMinimal>.
+
+<BBDMinimal> N D Required BBD on delivery, alternative to
+
+<BBDRemTime>
+
+<BBDFix> N D This BBD is to be supplied, e.g., for clearance sales, not
+
+usable in combination with <BBDMinimal> or
+
+<BBDRemTime>
+
+<RequiredLot> N S 32 Required lot
+
+<RequiredQuality N S 32 Characteristics for the quality of articles that deviate
+
+> from the norm, e.g. B-Stock, Overhangs
+
+<ArticleText> N S 64 Alternative article text for the delivery note
+
+<InfoText> N S 64 Additional text for the delivery note
+
+
+
+<ExportDeclarati N S 128 Item description for customs declaration
+
+on>
+
+<CustomsTariffN N S 16 Customs tariff number for the item from this position in
+
+o> the relevant destination country
+
+<PickingRules> N S 64 Rules for order picking, e.g., BBD or lot purity
+
+<PickingHint> N S 64 Picking hint
+
+<PackingHint> N S 64 Packing hint
+
+<ShippingService N S 64 Shipping service provider for this order item
+
+>
+
+<ShippingRules> N S 64 Special shipping instructions
+
+<CrossdockNum N S 32 If it is a crossdock item, this number corresponds to the
+
+ber> number in the associated purchase order
+
+<PricePerUnitNet N F 7.3 Price per unit net
+
+>
+
+<PricePerUnitGro N F 7.3 Price per unit gross
+
+ss>
+
+<DiscountPerUnit N F 7.3 Discount per unit net
+
+Net>
+
+<VATPerUnit> N F 7.3 Tax amount per unit
+
+<VATPercent> N F 5.1 Tax as a percentage
+
+<PosBarcode> N S 32 EAN number or barcode, which is exclusively valid for
+
+the order item. Used for customer- or order-specific
+
+articles. During picking and packing the barcode is
+
+checked against this barcode and not against the EAN
+
+of the article.
+
+<UniqueID> N S 32 Unique ID of the stock to be delivered, the quantity
+
+must then be 1
+
+Value Added Services
+
+
+
+Tag R T L Description
+
+<ValueAddedServices> List of additional tasks
+
+for this position
+
+<ValueAddedService> Task
+
+<Service> N S 64 Type of service,
+
+engraving
+
+<ServiceInfo> N S 128 Additional information
+
+about the service, e.g.
+
+engraving text
+
+Response
+
+XML-Body structure
+
+1 <DeliveryOrderResponse>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <OrderStatus>
+6 <OrderNumber>
+7 <OrderReferenz>
+8 <OrderCommNumber>
+9 <PurchaseNumber>
+10 <DeliveryNoteNumber>
+11 <DeliveryDate>
+12 <ErrorText>
+13 <CancellationReason>
+14 <ProcessTimestamp>
+15 </DeliveryOrderResponse>
+
+JSON-Body structure
+
+1 {
+2   „location“: ,
+3   „warehouse“: ,
+4   „client“: ,
+5   „orderstatus“: ,
+6   „ordernumber“: ,
+7   „orderreferenz“: ,
+8   „ordercommnumber“: ,
+9   „purchasenumber“: ,
+10   „deliverynotenumber“: ,
+11   „deliverydate“: ,
+12   „errortext“: ,
+13   „cancellationreason“: ,
+14   „processtimestamp“:
+15 }
+16
+
+
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag T L Description
+
+<DeliveryOrderResp
+
+onse>
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 Client or subclient
+
+<OrderStatus> S 16 Status of the data transfer:
+
+<br>ifcerror: The data could not be
+
+transferred<br>received: Data
+
+successfully transferred
+
+<OrderNumber> S 32 Order number, this number must be
+
+unique and not repeated
+
+<OrderReferenz> S 32 Order reference
+
+<OrderCommNumb S 32 Commission number of the order
+
+er>
+
+<PurchaseNumber> S 32 Order number
+
+<DeliveryNoteNumb S 32 Delivery note no.
+
+er>
+
+
+
+<DeliveryDate> D 16 Delivery date
+
+<ErrorText> S 64 In case of status=ifcerror here is the
+
+cause of the error
+
+<ProcessTimestamp T Time stamp of the process
+
+>
+
+Purchase order  -> storelogix
+
+Purchase orders from the manufacturer or supplier
+
+Communication process
+
+Extern Process storelogix
+
+Order transfer
+
+PurchaseOrder ->
+
+<- If everything is ok
+
+PurchaseOrderResponse, Status = received
+
+If an error was detected
+
+PurchaseOrderResponse, Status = ifcerror und ErrorText =<Ursache>
+
+Goods accepted
+
+With items
+
+<- GoodsReceiptResponse 
+
+Order completed
+
+Only status, no items
+
+
+
+<- PurchaseOrderResponse, Status = completed
+
+REST-Call
+
+POST
+
+https://api.storelogix.de:<Port>/REST/PurchaseOrder/insert_purchaseorder?AccessToken=
+
+<AccessToken>&Client=<ClientName>
+
+If for security reasons the login data must not be included in the URL, they can be passed in the
+
+http header under "AccessToken":
+
+AccessToken: 55CD0AE9-D4E6-4A79-AFA3-E8DD54682017
+
+XML-Structure
+
+1 <PurchaseOrders>
+2 <PurchaseOrder>
+3 <Location>
+4 <Warehouse>
+5 <Client>
+6 <Source>
+7 <PurchaseNumber>
+8 <PurchaseReference>
+9 <PurchaseCommNumber>
+10 <PurchaseProcessNumber>
+11 <PurchaseCostCenter>
+12 <PurchaseDate>
+13 <DeliveryDate>
+14 <SupplierNumber>
+15 <SupplierName>
+16 <DeliveryTourNumber>
+17 <DeliveryNoteNumber>
+18 <Hint>
+19 <ProjectID>
+20 <CostCenter>
+21
+22 <SupplierAddress>
+23 <Salutation>
+24 <Company>
+25 <Name1>
+26 <Name2>
+27 <Street>
+28 <StreetAddition>
+29 <PostCode>
+30 <City>
+31 <State>
+32 <CountryCode>
+33 <Email>
+34 <Phone>
+35 <LanguageCode>
+36 <GLN>
+37 </SupplierAddress>
+38
+39 <Items>
+
+
+
+40 <Item>
+41 <PosNumber>
+42 <ItemNo>
+43 <CustomItemNo>
+44 <ItemVariant>
+45 <PurchaseItemNo>
+46 <ManufacturerItemNo>
+47 <ItemUnit>
+48 <EAN>
+49 <Quantity>
+50 <NetWeight>
+51 <BBD>
+52 <Lot>
+53 <CrossdockNumber>
+54 <CustemOrderNumber>
+55 <ProjectID>
+56 <SSCCNo>
+57 <HUNo>
+58 </Item>
+59 </Items>
+60 </PurchaseOrder>
+61 </PurchaseOrders>
+
+JSON-Structure
+
+1 {
+2 "PurchaseOrder": {
+3 "Location": ,
+4 "Warehouse": ,
+5 "Client": ,
+6 "Source": ,
+7 "PurchaseNumber": ,
+8 "PurchaseReference": ,
+9 "PurchaseCommNumber": ,
+10 "PurchaseProcessNumber": ,
+11 "PurchaseCostCenter": ,
+12 "PurchaseDate": ,
+13 "DeliveryDate": ,
+14 "SupplierNumber": ,
+15 "SupplierName": ,
+16 "DeliveryTourNumber": ,
+17 "DeliveryNoteNumber": ,
+18 "Hint": ,
+19
+20 "SupplierAddress": {
+21 "Salutation": ,
+22 "Company": ,
+23 "Name1": ,
+24 "Name2": ,
+25 "Street": ,
+26 "StreetAddition": ,
+27 "PostCode": ,
+28 "City": ,
+29 "State": ,
+30 "CountryCode": ,
+31 "Email": ,
+32 "Phone": ,
+33 "LanguageCode": ,
+34 "GLN":
+35 },
+36
+37 "Items": [
+38 {
+39 "PosNumber": ,
+40 "ItemNo": ,
+41 "CustomItemNo": ,
+
+
+
+42 "ItemVariant": ,
+43 "PurchaseItemNo": ,
+44 "ManufacturerItemNo": ,
+45 "ItemUnit": ,
+46 "EAN": ,
+47 "Quantity": ,
+48 "NetWeight": ,
+49 "Lot": ,
+50 "BBD": ,
+51 "CrossdockNumber": ,
+52 "CustemOrderNumber":
+53 }
+54 ]
+55 }
+56 }
+57
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length F= Decimal number with decimal places
+
+Tag R T L Description
+
+<PurchaseOrder Y Supplier order or goods
+
+> expectation
+
+<Location> Y S 32 Location
+
+<Warehouse> Y S 32 Warehouse
+
+<Client> N S 32 The Purchase order belongs to
+
+this subclient, if empty, the
+
+purchase order is assigned to
+
+the storage client
+
+<Source> N S 32 Source of the purchase order,
+
+e.g.: SAP004 or similar
+
+<PurchaseNumbe Y S 32 Purchase order number
+
+r>
+
+<PurchaseRefere N S 32 Order reference
+
+nce>
+
+
+
+<PurchaseComm N S 32 Commission number of the order
+
+Number>
+
+<PurchaseProces N S 32 Process no. of the order
+
+sNumber>
+
+<PurchaseCostC N S 32 Cost center for the order
+
+enter>
+
+<PurchaseType> N S 16 Type of order e.g., CR for
+
+crossdock
+
+<PurchaseDate> N D 16 Order date
+
+<DeliveryDate> N D 16 Notified delivery date
+
+<SupplierNumber N S 32 Supplier number
+
+>
+
+<SupplierName> N S 64 Supplier
+
+<DeliveryTourNu N S 32 Tour no. of the delivery
+
+mber>
+
+<DeliveryNoteNu N S 32 Delivery note number
+
+mber>
+
+<Hint> N S 64 Note
+
+<ProjectID> N S 32 Project ID for the entire
+
+purchase order
+
+<CostCenter> N S 32 Cost center
+
+<SupplierAddres Address of the supplier
+
+s> (optional)
+
+<Salutation> N S 16 Salutation
+
+<Company> N S 64 Company, if specified, then
+
+preferably the same as
+
+<SupplierName>
+
+<Name1> Y S 64 First name, preferably the same
+
+as <SupplierName>
+
+
+
+<Name2> N S 64 Second name
+
+<Street> Y S 64 Street
+
+<StreetAddition> N S 64 Streets addition
+
+<PostCode> Y S 16 Post code
+
+<City> Y S 64 City
+
+<State> N S 16 State or region within the
+
+country (USA)
+
+<CountryCode> N S 3 Country according to ISO 3166,
+
+if empty then DE
+
+<Email> N S 64 eMail address in the form 
+
+name@adress.domain
+
+<Phone> N S 64 Phone number
+
+<LanguageCode> N S 3 Language code according to
+
+ISO 639, if empty then de
+
+<SupplierGLN> N S 16 GLN or ILN of the supplier
+
+<DeliveryGLN> N S 16 GLN or ILN of the supplying
+
+company
+
+<Items> List of ordered positions
+
+<Item> Position
+
+<PosNumber> N I 7 Position number, must be unique
+
+and must not change during
+
+updates. (No renumbering of the
+
+positions allowed)
+
+<PosReferenze> N S 32 Position reference
+
+<ItemNo> Y S 32 Article number
+
+<CustomItemNo> N S 64 Article number of the client, can
+
+be used alternatively to
+
+<ItemNo>
+
+
+
+<ItemVariant> N S 32 ID of this variant. This ID has
+
+priority over the <ItemNo>
+
+<PurchaseItemN N S 64 Article number of the supplier,
+
+o> does not replace <ItemNo> or
+
+<ItemVariant>
+
+<ManufacturerIte N S 64 Manufacturer's article number,
+
+mNo> does not replace <ItemNo> or
+
+<ItemVariant>.
+
+<ItemUnit> N S 32 Unit
+
+<EAN> N S 14 EAN number of the article,
+
+alternatively to <ItemNo> or
+
+<ItemVariant>
+
+<Quantity> Y I 5 The quantity to be delivered in
+
+units
+
+<NetWeight> N F 6,3 The net weight to be delivered in
+
+kg
+
+<Lot> N S 32 Lot to be delivered
+
+<BBD> N D 32 Best before date (BBD) to be
+
+delivered
+
+<CrossdockNum N S 32 If it is a crossdock order, this
+
+ber> number corresponds to the
+
+number in the associated
+
+delivery item
+
+<CustemOrderNu N S 32 The order item is intended
+
+mber> exclusively for the delivery order
+
+number and may not be planned
+
+for anything else
+
+<ProjectID> N S 32 Project id for this pos.
+
+<SSCCNo> N S 32 SSCC number of the delivered
+
+loading unit
+
+
+
+<HUNo> N S 32 Handling unit number of the
+
+delivered loading unit
+
+Response
+
+XML-Body structure
+
+1 <PurchaseOrderResponse>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <PurchaseOrderStatus>
+6 <PurchaseNumber>
+7 <PurchaseReference>
+8 <PurchaseCommNumber>
+9 <PurchaseProcessNumber>
+10 <PurchaseCostCenter>
+11 <PurchaseType>
+12 <PurchaseDate>
+13 <ErrorText>
+14 <CancellationReason>
+15 <ProcessTimestamp>
+16 </ PurchaseOrderResponse >
+
+JSON-Body structure
+
+1 {
+2 „location“:,
+3 „warehouse“:,
+4 „client“:,
+5 „purchaseorderstatus“:,
+6 „purchasenumber“:,
+7 „purchasereference“:, 
+8 „purchasecommnumber“:,
+9 „purchaseprocessnumber“:,
+10 „purchasecostcenter“:,
+11 „purchasetype“:,
+12 „purchasedate“:,
+13 „errortext“:,
+14 „cancellationreason“:,
+15 „processtimestamp“:
+16 }
+17
+18
+
+Incoming Goods -> storelogix
+
+Creating and posting a goods receipt
+
+Communication process
+
+Extern                       Process                       storelogix
+
+
+
+                                            Goods receipt transfer
+
+IncomingGoods                ->
+
+                                            <-                                         If everything is ok
+
+                                                                                              IncomingGoodResponse, Status =
+
+received
+
+                                                                                        If an error was detected
+
+                                                                                              IncomingGoodResponse, Status =
+
+ifcerror und ErrorText =<Error reason>
+
+REST-Call
+
+POST
+
+https://api.storelogix.de:<Port>/REST/IncomingGoods/create_goodsreceipt?AccessToken=
+
+<AccessToken>
+
+If for security reasons the login data must not be included in the URL, they can be passed in the
+
+http header under "AccessToken":
+
+AccessToken: 55CD0AE9-D4E6-4A79-AFA3-E8DD54682017
+
+XML-Structure
+
+1 <IncomingGood>
+2   <Location>
+3   <Warehouse>
+4   <Client>
+5   <Source>
+6   <ReceiptNumber>
+7   <PurchaseNumber>
+8   <PurchaseReference>
+9   <PurchaseDate>
+10   <DeliveryDate>
+11   <SupplierNumber>
+12   <SupplierName>
+13   <DeliveryNoteNumber>
+14   <Hint>
+15   <ProjectID>
+16   <CostCenter>
+17   <ReceiptArea>
+18   <SupplierAddress>
+19     <Salutation>
+20     <Company>
+21     <Name1>
+
+
+
+22     <Name2>
+23     <Street>
+24     <StreetAddition>
+25     <PostCode>
+26     <City>
+27     <State>
+28     <CountryCode>
+29     <Email>
+30     <Phone>
+31     <LanguageCode>
+32     <GLN>
+33   </SupplierAddress>
+34   <Items>
+35     <Item>
+36       <PosNumber>
+37       <ItemNo>
+38       <CustomItemNo>
+39       <ItemVariant>
+40       <PurchaseItemNo>
+41       <ManufacturerItemNo>
+42       <ItemUnit>
+43       <EAN>
+44       <Quantity>
+45       <NetWeight>
+46       <BBD>
+47       <Lot>
+48       <CrossdockNumber>
+49       <CustemOrderNumber>
+50       <ProjectID>
+51       <SSCCNo>
+52       <HUNo>
+53     </Item>
+54   </Items>
+55 </IncomingGood>
+56
+57
+
+Description
+
+R = Required field                    Y=Yes, N=No
+
+T = Type of field                       C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy
+
+or yyyy-mm-dd)
+
+L = Maximum field length          F= Decimal number with decimal places 
+
+Tag R T L Description
+
+<IncomingGood Y Goods receipt in warehouse
+
+>
+
+<Location> Y S 32 Location
+
+<Warehouse> Y S 32 Warehouse
+
+
+
+<Client> Y S 32 Goods receipt belongs to this
+
+subclient
+
+<Source> N S 32 Source of the receipt, e.g.,
+
+SAP004
+
+<ReceiptNumbe N S 32 Goods receipt number
+
+r>
+
+<PurchaseNumb N S 32 Purchase order number
+
+er>
+
+<PurchaseRefer N S 32 Purchase order reference
+
+ence>
+
+<ReceiptType> N S 16 Type of receipt, e.g., IN, RET, EM
+
+<PurchaseDate> N D 16 Purchase order date
+
+<DeliveryDate> N D 16 Notified delivery date
+
+<SupplierNumb N S 32 Supplier number
+
+er>
+
+<SupplierName N S 64 Supplier
+
+>
+
+<DeliveryNoteN N S 32 Delivery note number
+
+umber>
+
+<Hint> N S 64 Note
+
+<ProjectID> N S 32 Project ID for the entire purchase
+
+order
+
+<CostCenter> N S 32 Cost center
+
+<ReceiptArea> N S 32 Warehouse area where incoming
+
+goods arrived
+
+<Salutation> N S 16 Salutation
+
+<Company> N S 64 Company
+
+<Name1> Y S 64 First name, preferably same as
+
+<SupplierName>
+
+
+
+<Name2> N S 64 Second name
+
+<Street> Y S 64 Street
+
+<StreetAddition N S 64 Street addition
+
+>
+
+<PostCode> Y S 16 Postal code
+
+<City> Y S 64 City
+
+<State> N S 16 State or region within the country
+
+(USA)
+
+<CountryCode> N S 3 Country according to ISO 3166
+
+<Email> N S 64 Email address in form
+
+<name@address.domain>
+
+<Phone> N S 64 Phone number
+
+<LanguageCode N S 3 Language code according to ISO
+
+> 639
+
+<SupplierGLN> N S 16 GLN or ILN of the supplier
+
+<DeliveryGLN> N S 16 GLN or ILN of the supplying
+
+company
+
+<PosNumber> ( N I 7 Position number
+
+No renumbering
+
+of positions
+
+allowed)
+
+<PosReferenze> N S 32 Position reference
+
+<ItemNo> Y S 32 Article number
+
+<CustomItemNo N S 64 Client's article number
+
+>
+
+<ItemVariant> N S 32 ID of this variant
+
+<PurchaseItem N S 64 Supplier's article number
+
+No>
+
+
+
+<ManufacturerIt N S 64 Manufacturer's article number
+
+emNo>
+
+<ItemUnit> N S 32 Unit
+
+<EAN> N S 14 EAN number of the article
+
+<Quantity> Y I 5 Quantity to be delivered in units
+
+<NetWeight> N F 6,3 Net weight to be delivered in kg
+
+<Lot> N S 32 Lot to be delivered
+
+<BBD> N D 32 Best before date (BBD) to be
+
+delivered
+
+<CrossdockNu N S 32 If crossdock order, this number
+
+mber> matches the associated delivery
+
+item number
+
+<CustemOrderN N S 32 Order item intended only for the
+
+umber> delivery order number
+
+<ProjectID> N S 32 Project ID for this position
+
+<SSCCNo> N S 32 SSCC number of the delivered
+
+loading unit
+
+<HUNo> N S 32 Handling unit number of the
+
+delivered loading unit
+
+Returns Notification -> storelogix
+
+Announce customer returns
+
+Kommunikationsablauf
+
+Extern Ablauf Storelogix
+
+Retoureavis übernehmen
+
+ReturnNotification ->
+
+
+
+<- Wenn alles ok ist
+
+ReturnNotificationResponse, Status = received
+
+Wenn ein Fehler erkannt wurde
+
+ReturnNotificationResponse, Status = ifcerror und ErrorText =<Ursache>
+
+Ware angenommen
+
+Mit Items
+
+<- ReturnReceiptResponse
+
+Retoureavis abgeschlossen
+
+Nur Status, keine Items
+
+<- ReturnNotificationResponse, Status = completed
+
+REST-Call
+
+POST
+
+https://api.storelogix.de:<Port>/REST/Returns/insert_returns?AccessToken=<AccessToken>
+
+If for security reasons the login data must not be included in the URL, they can be passed in the
+
+http header under "AccessToken":
+
+AccessToken: 55CD0AE9-D4E6-4A79-AFA3-E8DD54682017
+
+XML-Aufbau
+
+1 <ReturnNotifications>
+2 <ReturnNotification>
+3 <Location>
+4 <Warehouse>
+5 <Client>
+6 <Trader>
+7 <Source>
+8 <ReturnType>
+9 <ReturnAdviceNumber>
+10 <RMANumber>
+11 <CustomerNumber>
+12 <SupplierNumber>
+13 <SupplierName>
+14 <OriginalOrderNumber>
+
+
+
+15 <OriginalOrderReferenz>
+16 <OriginalPurchaseNumber>
+17 <OriginalInvoiceNumber>
+18 <OriginalSaleDate>
+19 <NotificationDate>
+20 <ReturnReason>
+21 <ReturnReasonCode>
+22 <ReturnShippingNumber>
+23 <ReturnCarrier>
+24 <Hint>
+25 <ReturnInstruction>
+26
+27 <CustomerAddress>
+28 <Salutation>
+29 <Company>
+30 <Name1>
+31 <Name2>
+32 <Street>
+33 <StreetAddition>
+34 <PostCode>
+35 <City>
+36 <State>
+37 <CountryCode>
+38 <Email>
+39 <Phone>
+40 </CustomerAddress>
+41
+42 <Items>
+43 <Item>
+44 <PosNumber>
+45 <ItemNo>
+46 <ItemVariant>
+47 <ItemUnit>
+48 <ItemReturnID>
+49 <EAN>
+50 <Quantity>
+51 <UniqueID>
+52 <SerialNo>
+53 <Hint>
+54 <ItemReturnReason>
+55 <ItemReturnReasonCode>
+56 <ReturnInstruction>
+57 </Item>
+58 </Items>
+59 </ReturnNotification>
+60 <ReturnNotifications>
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length F= Decimal number with decimal places
+
+Tag R T L Description
+
+
+
+<ReturnNotificat Y Returns notification
+
+ion>
+
+<Location> Y S 32 Niederlassungen
+
+<Warehouse> Y S 32 Anlieferlager
+
+<Client> N S 32 The returns notification belongs
+
+to this client or sub-client
+
+<Trader> N S 64 Seller of the goods
+
+<Source> N S 32 Source of the returns notification,
+
+e.g. webshop, etc.
+
+<ReturnType> N S 32 Type of return, is freely selectable
+
+<ReturnAdviceN Y S 32 Returns notification number
+
+umber>
+
+<RMANumber> N S 32 Additional RMA number
+
+<CustomerNum N S 32 Customer number of the sender
+
+ber>
+
+<SupplierNumb N S 32 Original supplier number
+
+er>
+
+<SupplierName N S 64 Original supplier
+
+>
+
+<OriginalWareho N S 32 Original distribution warehouse
+
+use>
+
+<OriginalOrderN N S 32 Number of the original delivery
+
+umber> order
+
+<OriginalOrderR N S 32 Reference of the original delivery
+
+eferenz> order
+
+<OriginalPurcha N S 32 Original order number
+
+seNumber>
+
+<OriginalInvoice N S 32 Original invoice number
+
+Number>
+
+
+
+<OriginalSaleDat N D 16 Original date of sale
+
+e>
+
+<NotificationDat N D 16 Date of the returns notification
+
+e>
+
+<ReturnReason> N S 64 Reason for the return
+
+<ReturnReason N S 16 Code for the reason for return
+
+Code>
+
+<ReturnShipping N S 64 Shipment number on the return
+
+Number> label (full barcode)
+
+<ReturnCarrier> N S 32 Who will deliver the goods
+
+<Hint> N S 64 Hint
+
+<ReturnInstructi N S 128 Instructions for accepting returns,
+
+on> valid for this return
+
+<CustomerAddr Address of the sender
+
+ess>
+
+<Salutation> N S 16 Salutation
+
+<Company> N S 64 Company
+
+<Name1> Y S 64 First name
+
+<Name2> N S 64 Second name
+
+<Street> Y S 64 Street
+
+<StreetAddition N S 64 Streets addition
+
+>
+
+<PostCode> Y S 16 Post code
+
+<City> Y S 64 City
+
+<State> N S 16 State or region within the country
+
+(USA)
+
+<CountryCode> N S 3 Country according to ISO 3166, if
+
+empty then DE
+
+
+
+<Email> N S 64 eMail address in the form 
+
+name@adress.domain
+
+<Phone> N S 64 Phone number
+
+<Items> List of returned items
+
+<Item> Position
+
+<PosNumber> N I 7 Item number, must be unique and
+
+must not change during updates
+
+<ItemNo> Y S 64 Item number
+
+<CustomItemNo N S 64 Item number of the client, can be
+
+> used as an alternative to
+
+<ItemNo>
+
+<ItemVariant> N S 32 ID of this variant. This ID has
+
+priority over the <ItemNo>
+
+<ItemUnit> N S 32 Unit
+
+<ItemReturnID> N S 64 ID this position
+
+<EAN> N S 14 EAN number of the item, as an
+
+alternative to <ItemNo> or
+
+<ItemVariant>
+
+<Quantity> Y I 5 The returned quantity in units
+
+<UniqueID> N S 32 Unique ID of the item to be
+
+returned, the quantity is then
+
+always 1
+
+<SerialNo> N S 32 The serial number that is
+
+expected, the quantity must then
+
+be 1
+
+<PricePerUnitNe N F 7.3 Price per unit net
+
+t>
+
+<PricePerUnitGr N F 7.3 Price per unit gross
+
+oss>
+
+
+
+<Hint> N S 64 Note for this position only
+
+<ItemReturnRea N S 64 Reason for return for this item
+
+son>
+
+<ItemReturnRea N I Code for the reason for return
+
+sonCode>
+
+<ReturnInstructi N S 128 Receipt instructions for returns,
+
+on> valid for this position
+
+Response
+
+XML-Body structure
+
+1 <PurchaseOrderResponse>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <PurchaseOrderStatus>
+6 <PurchaseNumber>
+7 <PurchaseReference>
+8 <PurchaseCommNumber>
+9 <PurchaseProcessNumber>
+10 <PurchaseCostCenter>
+11 <PurchaseType>
+12 <PurchaseDate>
+13 <ErrorText>
+14 <CancellationReason>
+15 <ProcessTimestamp>
+16 </ PurchaseOrderResponse >
+
+JSON-Body structure
+
+1 {
+2 „location“:,
+3 „warehouse“:,
+4 „client“:,
+5 „purchaseorderstatus“:,
+6 „purchasenumber“:,
+7 „purchasereference“:,
+8 „purchasecommnumber“:,
+9 „purchaseprocessnumber“:,
+10 „purchasecostcenter“:,
+11 „purchasetype“:,
+12 „purchasedate“:,
+13 „errortext“:,
+14 „cancellationreason“:,
+15 „processtimestamp“:
+16 }
+17
+
+
+
+Feedback from storelogix
+
+The respective order or purchase order numbers and their item numbers are always referenced.
+
+The feedbacks are transmitted to a given REST URL with POST.
+
+If a transmission was not successful, this is repeated several times at intervals of 1 minute. To
+
+ensure synchronization, failing transmissions are not deferred.
+
+Orders
+
+storelogix → Goods receipt completed
+
+(can come multiple times for different items)
+
+storelogix → Order completed
+
+storelogix → Order cancelled
+
+Orders/Jobs
+
+storelogix → Order cancelled
+
+storelogix → Order deleted
+
+storelogix → Picking scheduled
+
+storelogix → Picking begins
+
+storelogix → Picking completed
+
+storelogix → Packing begins
+
+storelogix → Packing completed
+
+storelogix → Order completed
+
+storelogix → Loading begins
+
+storelogix → Loading completed
+
+Changes in Inventories
+
+storelogix → Unplanned changes in stock
+
+
+
+Stock
+
+storelogix → Stock or inventory response
+
+Pull Feedback Messages
+
+The REST interface can be used to retrieve feedback from storelogix that has not yet been
+
+processed.
+
+Either individually or several at once.
+
+The oldest, not yet processed confirmations are always transferred first.
+
+There is a separate endpoint for each feedback type.
+
+REST-Call
+
+GET
+
+1 https://api.storelogix.de:<Port>/REST/get_response/<FeedbackType>?Receive
+
+FeedbackType: Type of Feedback, for example DeliveryOrderResponse or 
+
+GoodsReceiptResponse
+
+ReceiverName: Recipient of the feedback, if nothing is specified, all feedback for the current
+
+communication partner is returned.
+
+ResponseCount: Maximum number of feedback messages to be output.
+
+If not specified, only one response is output at a time.
+
+Order status
+
+Every time the status changes in the order processing, this is reported.
+
+XML-Structure
+
+1 <DeliveryOrderResponse>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <Source>
+6 <OrderStatus>
+7 <OrderNumber>
+8 <OrderReferenz>
+9 <OrderCommNumber>
+10 <PurchaseNumber>
+11 <DeliveryNoteNumber>
+12 <DeliveryDate>
+13 <ErrorText>
+14 <CancellationReason>
+15 <ProcessTimestamp>
+
+
+
+16 </DeliveryOrderResponse>
+
+JSON-Structure
+
+1 {
+2 "deliveryorderresponse": {
+3 "location": ,
+4 "warehouse": ,
+5 "client": ,
+6 "orderstatus": ,
+7 "ordernumber": ,
+8 "orderreferenz": ,
+9 "ordercommnumber": ,
+10 "purchasenumber": ,
+11 "deliverynotenumber": ,
+12 "deliverydate": ,
+13 "errortext": ,
+14 "cancellationreason": ,
+15 "processtimestamp":
+16 }
+17 }
+18
+
+Descripton
+
+required field         Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag T L Description
+
+<DeliveryOrde
+
+rResponse>
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 The order belongs to this subclient, if
+
+empty, the order is assigned to the
+
+storage client
+
+<OrderStatus> S 16 Current status of the order:<br>• 
+
+ifcerror : The data could not be
+
+
+
+transferred<br>• received : Data
+
+successfully transferred<br>• 
+
+planed : Order is planned for
+
+picking<br>• picking : Order is in
+
+picking<br>• packing : Order is at
+
+packing<br>• finished : Order is
+
+completed<br>• shipped : Order is
+
+completed and shipped<br>• 
+
+canceled : Order was canceled
+
+<OrderNumber> S 32 Order number, this number must be
+
+unique and not repeated
+
+<OrderReferen S 32 Order reference
+
+z>
+
+<OrderCommNum S 32 Commission number of the order
+
+ber>
+
+<PurchaseNumb S 32 Order number
+
+er>
+
+<DeliveryNote S 32 Delivery note no., if none is specified,
+
+Number> then the system generates one
+
+<DeliveryDate D 16 Delivery date, if empty, the following
+
+> day is used
+
+<ErrorText> S 64 In case of status= ifcerror here is the
+
+cause of the error
+
+<Cancellation S 64 In case of status= canceled here is
+
+Reason> the reason for the cancellation
+
+<ProcessTimes T Time stamp of the process
+
+tamp>
+
+Order completed
+
+As independet feedback
+
+One response is always passed per XML file 
+
+
+
+XML-Structure
+
+1 <DeliveryOrderClose>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <Source>
+6 <OrderStatus>
+7 <OrderNumber>
+8 <OrderReferenz>
+9 <OrderCommNumber>
+10 <PurchaseNumber>
+11 <DeliveryNoteNumber>
+12 <ShippingDate>
+13 <DeliveryDate>
+14 <ProcessTimestamp>
+15
+16 <Items>
+17 <Item>
+18 <PosNumber>
+19 <PosReferenze>
+20 <ItemNo>
+21 <ItemVariant>
+22 <CustomItemNo>
+23 <ItemUnit>
+24 <EAN>
+25 <Quantity>
+26 <NetWeight>
+27 <GrossWeight>
+28 <BBD>
+29 <Lot>
+30 <Serial>
+31 <SSCC>
+32 </Item>
+33 </Items>
+34
+35 <Parcels>
+36 <Parcel>
+37 <Shipper>
+38 <ShippingService>
+39 <SSCC>
+40 <TrackingNumber>
+41 <TrackingURL>
+42 <ParcelWeight>
+43 <PackageType>
+44 <PackageSKU>
+45 <PackageSize>
+46 <L>
+47 <W>
+48 <H>
+49 </PackageSize>
+50 </Parcel>
+51 </Parcels>
+52
+53 <LoadingEquipments>
+54 <LoadingEquipment>
+55 <Quantity>
+56 <EquipmentType>
+57 </LoadingEquipment>
+58 </LoadingEquipments>
+59 </DeliveryOrderClose>
+
+JSON-Structure
+
+1 {
+2 "deliveryorderresponse": {
+
+
+
+3 "location": ,
+4 "warehouse": ,
+5 "client": ,
+6 "orderstatus": ,
+7 "ordernumber": ,
+8 "orderreferenz": ,
+9 "ordercommnumber": ,
+10 "purchasenumber": ,
+11 "deliverynotenumber": ,
+12 "shippingdate": ,
+13 "deliverydate": ,
+14 "processtimestamp": ,
+15
+16 "items": [
+17 {
+18 "posnumber": ,
+19 "itemno": ,
+20 "itemvariant": ,
+21 "customitemno": ,
+22 "itemunit": ,
+23 "ean": ,
+24 "quantity": ,
+25 "netweight": ,
+26 "grossweight": ,
+27 "bbd": ,
+28 "lot": ,
+29 "serial": ,
+30 "sscc":
+31 }
+32 ],
+33
+34 "parcels": [
+35 {
+36 "shipper": ,
+37 "shippingservice": ,
+38 "sscc": ,
+39 "trackingnumber": ,
+40 "trackingurl": ,
+41 "parcelweight": ,
+42 "packagetype": ,
+43 "packagesku": ,
+44 "packagesize": {
+45 "l": ,
+46 "w": ,
+47 "h":
+48 }
+49 }
+50 ],
+51
+52 "loadingequipments": [
+53 {
+54 "quantity": ,
+55 "equipmenttype":
+56 }
+57 ]
+58 }
+59 }
+60
+
+
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag T L Description
+
+<DeliveryOrderRespo Start of feedback information
+
+nse>
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 This subclient belongs to the
+
+delivery order
+
+<OrderStatus> S 16 Status of the order:<br>shipped:
+
+Order is completed and
+
+shipped<br>canceled: Order was
+
+canceled
+
+<OrderNumber> S 32 Order number
+
+<OrderReferenz> S 32 Order reference
+
+<OrderCommNumber S 32 Commission number of the order
+
+>
+
+<PurchaseNumber> S 32 Order number from the order
+
+<DeliveryNoteNumber S 32 Delivery note no.
+
+>
+
+<ShippingDate> D Shipping date
+
+<DeliveryDate> D Delivery date
+
+<ProcessTimestamp> T Time stamp of the process
+
+<Items> List of position feedbacks
+
+
+
+<Item> Confirmation of a position, can
+
+occur several times, positions
+
+that were not picked are not
+
+confirmed at all
+
+<PosNumber> I Position number from the order
+
+<PosReferenze> S 32 Position reference from the order
+
+<ItemNo> S 32 Article no. from the order
+
+<ItemVariant> S 32 ID of this variant. This ID has
+
+priority over the <ItemNo>
+
+<CustomItemNo> S 32 Article number of the client or
+
+subclient
+
+<ItemUnit> S 32 Unit
+
+<EAN> S 14 EAN number of the article,
+
+alternatively to <ItemNo> or
+
+<ItemVariant>
+
+<Quantity> I Quantity delivered
+
+<NetWeight> F 6,3 The delivered net weight in kg
+
+<GrossWeight> F 6,3 The delivered gross weight in kg,
+
+empty if no tare or gross weight is
+
+stored for the article
+
+<BBD> D Delivered BBD, empty if the article
+
+is not BBD led
+
+<Lot> S 32 Lot delivered
+
+<Serial> S 32 Serial number supplied
+
+<SSCC> S 18+ SSCC Number of the shipment
+
+unit in which the quantity is
+
+located.<br> If the quantity is
+
+spread over several SSCCs (multi-
+
+colli items spread over several
+
+
+
+packages), then all SSCCs are
+
+indicated, separated by commas.
+
+<Parcels> List of shipment units or package
+
+<Parcel> Info about a unit or package, can
+
+occur several times
+
+<Shipper> S 32 Shipper for the package, e.g., UPS,
+
+DHL, etc.
+
+<ShippingService> S 32 Shipping option like Express or
+
+Express 9:00
+
+<SSCC> S 18 SSCC number of the shipment unit
+
+<TrackingNumber> S 32 Shipment number
+
+<TrackingURL> S 64 Link for package tracking on the
+
+web
+
+<ParcelWeight> F 6,3 Total weight of the package incl.
+
+auxiliary means or pallet in kg
+
+<PackageType> S 32 Packaging type
+
+<PackageSKU> S 32 Packaging article no.
+
+<PackageSize> S 32 Packing size in mm or cm (L x W x
+
+H)
+
+<L> I Length in mm or cm
+
+<W> I Width in mm or cm
+
+<H> I Height in mm or cm
+
+<LoadingEquipments List of loading equipment (Euro
+
+> pallets, etc.)
+
+<LoadingEquipment> Per loading equipment
+
+<Quantity> I Quantity
+
+<EquipmentType> S 32 Type of loading equipment
+
+
+
+Order cancelled
+
+As independent feedback
+
+In <Quantity>, 0 is returned for all positions.
+
+One response is always passed per XML file.
+
+XML-Structure
+
+1 <DeliveryOrderResponse>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <Source>
+6 <OrderStatus>
+7 <OrderNumber>
+8 <OrderReferenz>
+9 <OrderCommNumber>
+10 <PurchaseNumber>
+11 <DeliveryNoteNumber>
+12 <DeliveryDate>
+13 <ProcessTimestamp>
+14 <CancellationReason>
+15
+16 <Items>
+17 <Item>
+18 <PosNumber>
+19 <PosReferenze>
+20 <ItemNo>
+21 <ItemVariant>
+22 <CustomItemNo>
+23 <ItemUnit>
+24 <EAN>
+25 <Quantity>0</Quantity>
+26 </Item>
+27 </Items>
+28
+29 </DeliveryOrderResponse>
+
+JSON-Structure
+
+1 {
+2 "deliveryorderresponse": {
+3 "location": ,
+4 "warehouse": ,
+5 "client": ,
+6 "orderstatus": ,
+7 "ordernumber": ,
+8 "orderreferenz": ,
+9 "ordercommnumber": ,
+10 "purchasenumber": ,
+11 "deliverynotenumber": ,
+12 "deliverydate": ,
+13 "errortext": ,
+14 "cancellationreason": ,
+15 "processtimestamp": ,
+16
+17 "Items": [
+18 {
+19 "PosNumber": ,
+20 "ItemNo": ,
+
+
+
+21 "ItemVariant": ,
+22 "CustomItemNo": ,
+23 "ItemUnit": ,
+24 "EAN": ,
+25 "Quantity": 0
+26 }
+27 ]
+28 }
+29 }
+30
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag T L Description
+
+<DeliveryOrderRe Start of feedback information
+
+sponse>
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 This subclient belongs to the delivery
+
+order
+
+<OrderStatus> S 32 Status, canceled
+
+<OrderNumber> S 32 Order number
+
+<OrderReferenz> S 32 Order reference
+
+<OrderCommNum S 32 Commission number of the order
+
+ber>
+
+<PurchaseNumber S 32 Order number
+
+>
+
+<DeliveryNoteNum S 32 Delivery note no.
+
+ber>
+
+
+
+<DeliveryDate> D Delivery date
+
+<ProcessTimestam T Time stamp of the process
+
+p>
+
+<CancellationReas S 64 Reason for the cancellation
+
+on>
+
+<Items> List of position confirmations
+
+<Item> Confirmation of a position, can
+
+occur several times, positions that
+
+were not picked are not confirmed at
+
+all.
+
+<PosNumber> I Position number from the order
+
+<PosReferenze> S 32 Position reference from the order
+
+<ItemNo> S 32 Article no. from the order
+
+<ItemVariant> S 32 ID of this variant. This ID has priority
+
+over the <ItemNo>
+
+<CustomItemNo> S 32 Article number of the client or
+
+subclient
+
+<ItemUnit> S 32 Unit
+
+<EAN> S 14 EAN number of the article,
+
+alternatively to <ItemNo> or
+
+<ItemVariant>
+
+<Quantity> I 0
+
+Goods accepted
+
+This message is sent immediately after the completion of an acceptance process.
+
+One response is always passed per XML file.
+
+
+
+XML-Structure
+
+1 <GoodsReceiptResponse>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <ReceiptNumber>
+6 <PurchaseNumber>
+7 <PurchaseReference>
+8 <DeliveryNoteNumber>
+9 <DeliveryDate>
+10 <ProcessTimestamp>
+11
+12 <Items>
+13 <Item>
+14 <PurchasePosNo>
+15 <PosReferenze>
+16 <ItemNo>
+17 <CustomItemNo>
+18 <ItemUnit>
+19 <EAN>
+20 <QuantityAvailable>
+21 <QuantityLocked>
+22 <BBD>
+23 <Lot>
+24 </Item>
+25 </Items>
+26
+27 <LoadingEquipments>
+28 <LoadingEquipment>
+29 <Quantity>
+30 <EquipmentType>
+31 </LoadingEquipment>
+32 </LoadingEquipments>
+33 </GoodsReceiptResponse>
+
+JSON-Structure
+
+1 {
+2 "goodsreceiptresponse": {
+3 "location": ,
+4 "warehouse": ,
+5 "client": ,
+6 "receiptnumber": ,
+7 "purchasenumber": ,
+8 "purchasereference": ,
+9 "deliverynotenumber": ,
+10 "deliverydate": ,
+11 "processtimestamp": ,
+12
+13 "items": [
+14 {
+15 "purchaseposno": ,
+16 "itemno": ,
+17 "customitemno": ,
+18 "itemunit": ,
+19 "ean": ,
+20 "quantityavailable": ,
+21 "quantitylocked": ,
+22 "bbd": ,
+23 "lot":
+24 }
+25 ],
+
+
+
+26
+27 "loadingequipments": [
+28 {
+29 "quantity": ,
+30 "equipmenttype":
+31 }
+32 ]
+33 }
+34 }
+35
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag T L Description
+
+<GoodsReceiptRes Start of feedback informations
+
+ponse>
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 To this subclient belongs the goods
+
+receipt
+
+<ReceiptNumber> S 32 Number of the Goods receipt
+
+<PurchaseNumber> S 32 Purchase order number, can be
+
+empty
+
+<PurchaseReferenc S 32 Purchase order reference, can be
+
+e> empty
+
+<DeliveryNoteNumb S 32 Delivery note no.
+
+er>
+
+<DeliveryDate> D Delivery date
+
+
+
+<ProcessTimestamp T Time stamp of the process
+
+>
+
+<Items> List of acceptance confirmations
+
+<Item> Acceptance positions, can occur
+
+several times
+
+<PurchasePosNo> I Position number from the purchase
+
+order, if no purchase order is
+
+specified, this information is missing
+
+<ItemNo> S 32 Received article no.
+
+<CustomItemNo> S 32 Article number of the client or
+
+subclient
+
+<ItemUnit> S 32 Accepted unit
+
+<EAN> S 14 EAN number of the article
+
+<QuantityAvailable> I Received quantity available
+
+<QuantityLocked> I Received quantity blocked directly
+
+<BBD> D Received BBD, empty if the article is
+
+not BBD led
+
+<Lot> S 32 Received lot
+
+<LoadingEquipmen List of loading equipment (Euro
+
+ts> pallets, etc.)
+
+<LoadingEquipmen Per loading equipment
+
+t>
+
+<Quantity> I Quantity
+
+<EquipmentType> S 32 Type of loading equipment
+
+Return accepted
+
+This message is sent immediately after the completion of a return acceptance process.
+
+
+
+One response is always passed per XML file.
+
+XML-Structure
+
+1 <ReturnReceiptResponse>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <RetoureNumber>
+6 <RMANumber>
+7 <ReturnDate>
+8 <OriginalOrderNumber>
+9 <ReturnReason> <ReturnReasonCode>
+10 <ProcessTimestamp>
+11
+12 <Items>
+13 <Item>
+14 <ItemNo>
+15 <CustomItemNo>
+16 <ItemUnit>
+17 <EAN>
+18 <QuantityOk>
+19 <QuantityLocked>
+20 <BBD>
+21 <Lot>
+22 <UniqueID>
+23 <Quality>
+24 <SerialNo>
+25 <ItemReturnReason>
+26 <ItemReturnReasonCode>
+27 <ItemReturnCondition>
+28 <ItemReturnCondition>
+29 <ConditionDescription>
+30 </Item>
+31 </Items>
+32
+33 </ReturnReceiptResponse>
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F = Decimal number with decimal places
+
+T = Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag T L Description
+
+
+
+<ReturnReceiptRespo Start of feedback information
+
+nse>
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 This subclient belongs to the
+
+return acceptance
+
+<RetoureNumber> S 32 Number of the return
+
+acceptance, assigned by the
+
+system
+
+<RMANumber> S 32 Additional RMA number that can
+
+be recorded
+
+<ReturnDate> D Date of return
+
+<OriginalOrderNumber S 32 Number of the original delivery
+
+> order
+
+<ReturnReason> S 64 Reason for return
+
+<ReturnReasonCode> I Code for the return reason
+
+<ProcessTimestamp> T Time stamp of the process
+
+<Items> List of acceptance
+
+confirmations
+
+<Item> Acceptance positions, can
+
+occur several times
+
+<ItemNo> S 32 Returned article no.
+
+<CustomItemNo> S 32 Article number of the client or
+
+subclient
+
+<ItemUnit> S 32 Returned unit
+
+<EAN> S 14 EAN number of the article
+
+<QuantityOk> I Returned quantity that is flawless
+
+
+
+<QuantityLocked> I Returned quantity that has
+
+defects
+
+<BBD> D Returned BBD, empty if the
+
+article is not BBD led
+
+<Lot> S 32 Returned lot
+
+<UniqueID> S 32 Unique ID of the item, the
+
+quantity is then always 1
+
+<Quality> S 32 Stock quality, e.g. A-Goods, B-
+
+Goods, Scrap. The information is
+
+only transferred if the stock is
+
+also assigned to a specific
+
+quality. Normally this is not the
+
+case.
+
+<SerialNo> S 32 Serial number of the item, the
+
+quantity is then always 1
+
+<ItemReturnReason> S 64 Reason for returning the article
+
+<ItemReturnReasonCo I Code for the reason for returning
+
+de> the article
+
+<ItemReturnCondition> S 64 Article condition
+
+<ItemReturnCondition> I Code for the condition of the
+
+article
+
+<ConditionDescription> S 256 Description of the article's
+
+condition
+
+Change in the status of the receipted return items
+
+If the status - ItemReturnReason , ItemReturnQuality , ItemReturnCondition or 
+
+ConditionDescription - of an item has changed, this message is generated.
+
+XML-Aufbau
+
+1 <ReturnReceiptResponse>
+2 <Location>
+
+
+
+3 <Warehouse>
+4 <Client>
+5 <Trader>
+6 <RetoureNumber>
+7 <ReturnAdviceNumber>
+8 <RMANumber>
+9 <CustomerNumber>
+10 <OriginalOrderNumber>
+11 <OriginalPurchaseNumber>
+12 <OriginalInvoiceNumber>
+13 <ReturnDate>
+14 <ReturnReason> <ReturnReasonCode>
+15 <ProcessTimestamp>
+16
+17 <Changes>
+18 <Change>
+19 <ItemStockStatus>
+20 <ReturnNotificationPosNo>
+21 <ItemNo>
+22 <CustomItemNo>
+23 <ItemUnit>
+24 <ItemReturnID>
+25 <EAN>
+26 <QuantityOk>
+27 <QuantityLocked>
+28 <BBD>
+29 <Lot>
+30 <UniqueID>
+31 <Quality>
+32 <SerialNo>
+33 <ItemReturnStatus>
+34 <ItemReturnReason>
+35 <ItemReturnReasonCode>
+36 <ItemReturnCondition>
+37 <ItemReturnConditionCode>
+38 <ConditionDescription>
+39 <ItemReturnQuality>
+40 <ItemReturnQualityCode>
+41 </Change>
+42 </Changes>
+43
+44 </ReturnReceiptResponse>
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag T L Description
+
+
+
+<ReturnReceiptRespo Start of feedback information
+
+nse>
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 This subclient belongs to the
+
+return acceptance
+
+<RetoureNumber> S 32 Number of the return acceptance,
+
+assigned by the system
+
+<RMANumber> S 32 Additional RMA number that can
+
+be recorded
+
+<ReturnDate> D Date of return
+
+<OriginalOrderNumber S 32 Number of the original delivery
+
+> order
+
+<ReturnReason> S 64 Reason for return
+
+<ReturnReasonCode> I Code for the return reason
+
+<ProcessTimestamp> T Time stamp of the process
+
+<Changes> List of changes
+
+<Change> Receipt items that have changed
+
+<ItemStockStatus> S 32 Status of the stock for this receipt
+
+item:<br>offstock: Only receipted
+
+but not yet pickable, is not listed
+
+in the stock reports<br>onstock:
+
+Fully pickable and in all stock
+
+reports<br>locked: Blocked stock,
+
+is listed in the stock reports
+
+<ReturnNotificationPos I The corresponding item number
+
+No> from the returns advice note,
+
+without advice note the field is
+
+empty or does not exist.
+
+<ItemNo> S 32 Returned article no.
+
+
+
+<CustomItemNo> S 32 Article number of the client or
+
+subclient
+
+<ItemUnit> S 32 Returned unit
+
+<EAN> S 14 EAN number of the article
+
+<QuantityOk> I Returned quantity that is flawless
+
+<QuantityLocked> I Returned quantity that has
+
+defects
+
+<BBD> D Returned BBD, empty if the article
+
+is not BBD led
+
+<Lot> S 32 Returned lot
+
+<UniqueID> S 32 Unique ID of the item, the
+
+quantity is then always 1
+
+<Quality> S 32 Stock quality, e.g. A-Goods, B-
+
+Goods, Scrap. The information is
+
+only transferred if the stock is also
+
+assigned to a specific quality.
+
+Normally this is not the case.
+
+<SerialNo> S 32 Serial number of the item, the
+
+quantity is then always 1
+
+<ItemReturnStatus> S 64 Status of this returns item, e.g.
+
+ACCEPT, CLARIFY, REPAIR,
+
+REJECTED etc.
+
+<ItemReturnReason> S 64 Reason for returning the article
+
+<ItemReturnReasonCo I Code for the reason for returning
+
+de> the article
+
+<ItemReturnCondition S 64 Article condition
+
+>
+
+<ItemReturnCondition I Code for the condition of the
+
+> article
+
+
+
+<ConditionDescription S 128 Status description as free text
+
+>
+
+<ItemReturnQuality> S 64 Quality of the returned item, e.g.
+
+A, B or C goods
+
+<ItemReturnQualityCo I Code for the quality, e.g. 1 to 3
+
+de>
+
+Purchase order fully completed
+
+This message is sent immediately after completion of an order. If the individual goods receipts
+
+have already been reported with GoodsReceiptResponse, this response no longer contains any
+
+items.
+
+One response is always passed per XML file.
+
+XML-Structure
+
+1 <PurchaseOrderResponse>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <PurchaseStatus>
+6 <PurchaseNumber>
+7 <PurchaseReference>
+8 <DeliveryNoteNumber>
+9 <DeliveryDate>
+10 <ErrorText>
+11 <CancellationReason>
+12 <ProcessTimestamp>
+13
+14 <Items>
+15 <Item>
+16 <PurchasePosNo>
+17 <PosReferenze>
+18 <ItemNo>
+19 <CustomItemNo>
+20 <ItemUnit>
+21 <EAN>
+22 <QuantityAvailable>
+23 <QuantityLocked>
+24 <BBD>
+25 <Lot>
+26 </Item>
+27 </Items>
+28
+29 <LoadingEquipments>
+30 <LoadingEquipment>
+31 <Quantity>
+
+
+
+32 <EquipmentType>
+33 </LoadingEquipment>
+34 </LoadingEquipments>
+35 </PurchaseOrderResponse>
+
+JSON-Structure
+
+1 {
+2 "purchaseorderresponse": {
+3 "location": ,
+4 "warehouse": ,
+5 "client": ,
+6 "purchasestatus": ,
+7 "purchasenumber": ,
+8 "purchasereference": ,
+9 "deliverynotenumber": ,
+10 "deliverydate": ,
+11 "errortext": ,
+12 "cancellationreason": ,
+13 "processtimestamp": ,
+14
+15 "items": [
+16 {
+17 "purchaseposno": ,
+18 "itemno": ,
+19 "customitemno": ,
+20 "itemunit": ,
+21 "ean": ,
+22 "quantityavailable": ,
+23 "quantitylocked": ,
+24 "bbd": ,
+25 "lot":
+26 }
+27 ],
+28
+29 "loadingequipments": [
+30 {
+31 "quantity": ,
+32 "equipmenttype":
+33 }
+34 ]
+35 }
+36 }
+37
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Datum (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+
+
+Tag T L Description
+
+<PurchaseOrderRespon Start of feedback information
+
+se>
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 This subclient belongs to the
+
+order
+
+<PurchaseStatus> S 32 Status:<br> • ifcerror: The
+
+data could not be
+
+transferred<br> • received:
+
+Order was accepted<br> •
+
+completed: Order was
+
+completed<br> • canceled:
+
+Order was canceled
+
+<PurchaseNumber> S 32 Purchase order number
+
+<PurchaseReference> S 32 Purchase order reference
+
+<DeliveryNoteNumber> S 32 Delivery note no.
+
+<DeliveryDate> D Date of delivery
+
+<ErrorText> S 64 In case of status=ifcerror here
+
+is the cause of the error
+
+<CancellationReason> S 64 In case of status=canceled
+
+here is the reason for the
+
+cancellation
+
+<ProcessTimestamp> T Time stamp of the process
+
+<Items> List of acceptance responses,
+
+this list is missing if the
+
+individual GRs have already
+
+been reported with 
+
+GoodsReceiptResponse. Only
+
+with status=completed
+
+
+
+<Item> Acceptance positions, can
+
+occur several times
+
+<PurchasePosNo> I Position number from the
+
+purchase order, if no purchase
+
+order is specified, this
+
+information is missing
+
+<PosReferenze> S 32 Positions reference from the
+
+purchase order
+
+<ItemNo> S 32 Accepted article no.
+
+<CustomItemNo> S 32 Article number of the client or
+
+subclient
+
+<ItemUnit> S 32 Accepted unit
+
+<EAN> S 14 EAN number of the article
+
+<QuantityAvailable> I Received quantity available
+
+<QuantityLocked> I Received quantity blocked
+
+directly
+
+<BBD> D Received BBD, empty if the
+
+article is not BBD led
+
+<Lot> S 32 Received lot
+
+<LoadingEquipments> List of loading equipment (Euro
+
+pallets, etc.). Only with
+
+status=completed
+
+<LoadingEquipment> Per loading equipment
+
+<Quantity> I Quantity
+
+<EquipmentType> S 32 Type of loading equipment
+
+
+
+Unplanned change in stock
+
+Here, only those stock changes are reported which have not occurred through normal picking or
+
+a goods receipt. E.g., deletion or correction of stocks, inventory corrections or posting of found
+
+objects.
+
+BBD and lot changes are reported via an outflow with old BBD or lot and the inflow with new
+
+BBD or lot.
+
+XML-Structure
+
+1 <InventorResponse>
+2 <InventorChanges>
+3 <InventorChange>
+4 <Location>
+5 <Warehouse>
+6 <Client>
+7 <ChangeType>
+8 <ItemNo>
+9 <CustomItemNo>
+10 <ItemUnit>
+11 <EAN>
+12 <Quantity>
+13 <BBD>
+14 <Lot>
+15 <Reason>
+16 <ProcessTimestamp>
+17 </InventorChange>
+18 </InventorChanges>
+19 </InventorResponse>
+
+Description
+
+R = Required field Y=Yes, N=No
+
+T = Type of field C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length
+
+F=Decimal number with decimal places
+
+T=Time stamp ISO-8601 yyyy-mm-ddThh:mi.ss+01:00
+
+Tag T L Description
+
+<InventorCha Start of changes
+
+nges>
+
+<InventorCha List of changes, may occur several
+
+nge> times
+
+
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 This subclient belongs to the stock
+
+change
+
+<ChangeType> S Type of change
+
+DEL Stock deleted
+
+ADD Stock added
+
+CHG Quantity changed
+
+INV Inventory correction
+
+<ProcessTimes T Time stamp of the action
+
+tamp>
+
+<ItemNo> S 32 Article number
+
+<CustomItemN S 32 Article number of the client or subclient
+
+o>
+
+<ItemUnit> S 32 Unit
+
+<EAN> S 14 EAN number of the article
+
+<Quantity> i Quantity change
+
+<BBD> D BBD, empty if the article is not BBD led
+
+<Lot> S 32 Lot
+
+<Reason> S 64 Reason for change
+
+Stock or inventory confirmation
+
+One response is always passed per XML.
+
+REST call:
+
+https://api.storelogix.de:<Port>/REST/inventory/stock?AccessToken=<AccessToken>&Client=
+
+<ClientName>&ArticleNo=<ArticleNo>&IncludeQualities=<Boolean>
+
+
+
+If <ArticleNo> is passed empty or not at all, then a stock list with all articles of the client
+
+<ClientName>.is returned. 
+
+If for security reasons the login data must not be included in the URL, they can be passed in the
+
+http header under "AccessToken":
+
+If “IncludeQualities=true” the stock-counts get separated by quality and <Quality> is added for
+
+each item in the response.
+
+XML-Structure
+
+1 <Inventor>
+2 <Location>
+3 <Warehouse>
+4 <Client>
+5 <InventorNumber>
+6 <InventorType>
+7 <InventorDate>
+8 <InventorTime>
+9
+10 <Items>
+11 <Item>
+12 <ItemNo>
+13 <CustomItemNo>
+14 <ItemUnit>
+15 <EAN>
+16 <QuantityAvailable>
+17 <QuantityOrdered>
+18 <QuantityLocked>
+19 <BBD>
+20 <Lot>
+21 <Quality>
+22 </Item>
+23 </Items>
+24 </Inventor>
+
+Description
+
+R = Required field         Y=Yes, N=No
+
+T = Type of field         C=Character, S=String, I=Number, integer, D=Date (dd.mm.yyyy or
+
+yyyy-mm-dd)
+
+L = Maximum field length F=Decimal number with decimal places
+
+Tag T L Description
+
+<Inventor> Start of inventory reporting
+
+
+
+<Location> S 32 Location
+
+<Warehouse> S 32 Warehouse
+
+<Client> S 32 This subclient belongs to the order
+
+<InventorNum S 32 Inventory number
+
+ber>
+
+<InventorType S 32 Type of inventory
+
+> FULL: Complete inventory
+
+DAY: Daily stock
+
+<InventorDate D Date of the inventory closing
+
+>
+
+<InventorTime T Time of the inventory closing, format
+
+> hh:mm:ss±hh (±hh = Timezone, +01 for
+
+Germany)
+
+<Items> List of stocks
+
+<Item> Stock items, can occur more than once
+
+<ItemNo> S 32 Article no.
+
+<CustomItem S 32 Article number of the client or subclient
+
+No>
+
+<ItemUnit> S 32 Unit
+
+<EAN> S 14 EAN number of the article
+
+<QuantityAvail I Available quantity
+
+able>
+
+<QuantityOrde I Quantity from delivery orders not yet
+
+red> completed, this quantity is included in the
+
+available quantity
+
+<QuantityLock I Locked quantity
+
+ed>
+
+<BBD> D BBD, empty if the article is not BBD led
+
+
+
+<Lot> S 32 Lot
