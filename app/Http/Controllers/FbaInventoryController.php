@@ -76,7 +76,12 @@ class FbaInventoryController extends Controller
             ]);
         }
 
-        \App\Jobs\SyncFbaInventoryJob::dispatch($account);
+        $logFile = storage_path('logs/sync-inventory.log');
+        $basePath = base_path();
+        $cmd = "cd {$basePath} && nohup php artisan app:sync-fba-inventory > {$logFile} 2>&1 &";
+        exec($cmd);
+
+        \Illuminate\Support\Facades\Log::info("FBA Sync Background-Prozess gestartet: {$cmd}");
 
         return redirect()->route('fba-inventory.index')
             ->with('success', 'Inventory-Synchronisation gestartet…');
@@ -104,7 +109,7 @@ class FbaInventoryController extends Controller
             'total_pages'  => $log->total_pages,
             'fetched_skus' => $log->fetched_skus,
             'total_skus'   => $log->total_skus,
-            'progress'     => $log->total_skus > 0 ? round(($log->fetched_skus / max($log->total_skus, 1)) * 100) : ($log->status === 'pending' ? 0 : 0),
+            'started_at'   => $log->started_at?->timestamp,
             'error'        => $log->error_message,
         ]);
     }

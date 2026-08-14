@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\SyncFbaInventoryJob;
 use App\Models\AmazonAccount;
 use App\Models\InventorySyncLog;
+use App\Services\FbaInventoryService;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -13,6 +13,12 @@ use Illuminate\Console\Command;
 #[Description('Synchronisiert den FBA-Bestand für alle aktiven Amazon-Konten')]
 class SyncFbaInventory extends Command
 {
+    public function __construct(
+        private readonly FbaInventoryService $service
+    ) {
+        parent::__construct();
+    }
+
     public function handle(): int
     {
         $accounts = AmazonAccount::where('active', true)->get();
@@ -23,22 +29,66 @@ class SyncFbaInventory extends Command
         }
 
         foreach ($accounts as $account) {
+            $log = null;
             if (\Schema::hasTable('inventory_sync_logs')) {
-                $running = InventorySyncLog::where('amazon_account_id', $account->id)
-                    ->where('status', 'running')
-                    ->exists();
+                $log = InventorySyncLog::where('amazon_account_id', $account->id)
+                    ->whereIn('status', ['pending', 'running'])
+                    ->latest()
+                    ->first();
 
-                if ($running) {
-                    $this->warn("Überspringe {$account->name} - Sync bereits aktiv.");
-                    continue;
+                if (!$log) {
+                    $log = InventorySyncLog::create([
+                        'amazon_account_id' => $account->id,
+                        'status'            => 'running',
+                        'started_at'        => now(),
+                    ]);
+                } elseif ($log->status === 'pending') {
+                    $log->update(['status' => 'running']);
                 }
             }
 
             $this->info("Synchronisiere: {$account->name}...");
-            SyncFbaInventoryJob::dispatch($account);
+
+            try {
+                $summaries = $this->service->getSummaries($account, [], function ($page, $totalFetched, $hasMore) use ($log) {
+                    if ($log) {
+                        $log->update([
+                            'current_page' => $page,
+                            'fetched_skus' => $totalFetched,
+                        ]);
+                    }
+                });
+
+                \Illuminate\Support\Facades\Cache::put(
+                    "fba_inventory_{$account->id}",
+                    $summaries,
+                    now()->addHours(4)
+                );
+
+                if ($log) {
+                    $log->update([
+                        'status'       => 'completed',
+                        'total_pages'  => $log->current_page ?? 0,
+                        'total_skus'   => count($summaries),
+                        'fetched_skus' => count($summaries),
+                        'completed_at' => now(),
+                    ]);
+                }
+
+                $this->info("Fertig: " . count($summaries) . " SKUs synchronisiert.");
+            } catch (\Throwable $e) {
+                if ($log) {
+                    $log->update([
+                        'status'        => 'failed',
+                        'error_message' => $e->getMessage(),
+                        'completed_at'  => now(),
+                    ]);
+                }
+
+                $this->error("Fehler: " . $e->getMessage());
+            }
         }
 
-        $this->info('Alle Sync-Jobs dispatcht.');
         return self::SUCCESS;
     }
 }
