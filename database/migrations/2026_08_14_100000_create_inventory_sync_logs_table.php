@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('amazon_account_id')->constrained()->cascadeOnDelete();
             $table->enum('status', ['pending', 'running', 'completed', 'failed'])->default('pending');
-            $table->integer('total_pages')->default(0);
+            $table->integer('total_pages')->default(0)->nullable();
             $table->integer('current_page')->default(0);
             $table->integer('total_skus')->default(0);
             $table->integer('fetched_skus')->default(0);

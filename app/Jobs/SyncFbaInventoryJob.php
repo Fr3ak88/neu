@@ -65,7 +65,7 @@ class SyncFbaInventoryJob implements ShouldQueue
             if ($log) {
                 $log->update([
                     'status'       => 'completed',
-                    'total_pages'  => $log->current_page,
+                    'total_pages'  => $log->current_page ?? 0,
                     'total_skus'   => count($summaries),
                     'fetched_skus' => count($summaries),
                     'completed_at' => now(),
