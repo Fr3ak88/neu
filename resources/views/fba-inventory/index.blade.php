@@ -100,7 +100,7 @@ const progressSkus = document.getElementById('progressSkus');
 const syncErrorText = document.getElementById('syncErrorText');
 const syncBtn = document.getElementById('syncBtn');
 let pollInterval = null;
-let firstCheck = true;
+let freshSync = false;
 
 function startPolling() {
     if (pollInterval) return;
@@ -128,26 +128,29 @@ async function checkProgress() {
 
         if (data.status === 'none') {
             syncProgress.style.display = 'none';
-            if (firstCheck) stopPolling();
-            firstCheck = false;
+            stopPolling();
             return;
         }
 
-        firstCheck = false;
-        syncBtn.disabled = true;
-
         if (data.status === 'completed') {
-            stopPolling();
-            syncProgress.style.display = 'block';
-            progressBar.style.width = '100%';
-            progressPercent.textContent = '100%';
-            progressText.textContent = 'Synchronisation abgeschlossen!';
-            progressSkus.textContent = data.total_skus + ' SKUs synchronisiert';
-            setTimeout(() => { location.reload(); }, 1500);
+            if (freshSync) {
+                stopPolling();
+                syncProgress.style.display = 'block';
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+                progressText.textContent = 'Synchronisation abgeschlossen!';
+                progressSkus.textContent = data.total_skus + ' SKUs synchronisiert';
+                setTimeout(() => { location.reload(); }, 2000);
+                freshSync = false;
+            } else {
+                syncProgress.style.display = 'none';
+                stopPolling();
+            }
             return;
         }
 
         if (data.status === 'failed') {
+            freshSync = false;
             stopPolling();
             syncProgress.style.display = 'none';
             syncError.style.display = 'block';
@@ -156,8 +159,10 @@ async function checkProgress() {
         }
 
         if (data.status === 'running' || data.status === 'pending') {
+            freshSync = true;
             syncProgress.style.display = 'block';
             syncError.style.display = 'none';
+            syncBtn.disabled = true;
 
             const pct = data.fetched_skus > 0 ? Math.min(Math.round((data.fetched_skus / Math.max(data.total_skus || 1, data.fetched_skus + 50)) * 100), 99) : 0;
             progressBar.style.width = pct + '%';
