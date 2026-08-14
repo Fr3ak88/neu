@@ -76,12 +76,7 @@ class FbaInventoryController extends Controller
             ]);
         }
 
-        $logFile = storage_path('logs/sync-inventory.log');
-        $basePath = base_path();
-        $cmd = "cd {$basePath} && nohup php artisan app:sync-fba-inventory > {$logFile} 2>&1 &";
-        exec($cmd);
-
-        \Illuminate\Support\Facades\Log::info("FBA Sync Background-Prozess gestartet: {$cmd}");
+        \App\Jobs\SyncFbaInventoryJob::dispatch($account);
 
         return redirect()->route('fba-inventory.index')
             ->with('success', 'Inventory-Synchronisation gestartet…');
