@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\RechnungAuftrag;
 use App\Models\RechnungAuftragPosition;
 use App\Models\Customer;
-use App\Models\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -201,7 +200,7 @@ class RechnungAuftragController extends Controller
     public function pdf(RechnungAuftrag $auftrag)
     {
         $auftrag->load('positions');
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         $html = view('rechnungen.auftraege.pdf', [
             'auftrag'  => $auftrag,
@@ -228,7 +227,7 @@ class RechnungAuftragController extends Controller
             'email' => 'required|email',
         ]);
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         Mail::to($request->email)
             ->send(new \App\Mail\AuftragVersendetMail($auftrag, $tenant));

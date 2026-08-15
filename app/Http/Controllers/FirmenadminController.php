@@ -11,6 +11,7 @@ class FirmenadminController extends Controller
     public function index()
     {
         $users = User::where('id', '!=', auth()->id())
+            ->where('tenant_id', auth()->user()->tenant_id)
             ->latest()
             ->get();
 
@@ -32,6 +33,7 @@ class FirmenadminController extends Controller
         ]);
 
         User::create([
+            'tenant_id' => auth()->user()->tenant_id,
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],

@@ -14,13 +14,12 @@ use App\Services\StorlogixService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Models\Tenant;
 
 class WmsSyncController extends Controller
 {
     public function index()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $jtl = new JtlWawiApiService($tenant);
         $logs = SyncLog::latest()->take(50)->get();
 
@@ -35,7 +34,7 @@ class WmsSyncController extends Controller
 
     public function syncItems()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $jtl = new JtlWawiApiService($tenant);
 
         if (!$jtl->isConfigured()) {
@@ -96,7 +95,7 @@ class WmsSyncController extends Controller
 
     public function syncStocks()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $jtl = new JtlWawiApiService($tenant);
 
         if (!$jtl->isConfigured()) {
@@ -149,7 +148,7 @@ class WmsSyncController extends Controller
 
     public function syncOrders()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $jtl = new JtlWawiApiService($tenant);
 
         if (!$jtl->isConfigured()) {
@@ -234,7 +233,7 @@ class WmsSyncController extends Controller
 
     public function pushStocks(Request $request)
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $jtl = new JtlWawiApiService($tenant);
 
         if (!$jtl->isConfigured()) {
@@ -286,7 +285,7 @@ class WmsSyncController extends Controller
 
     public function syncStorlogixReturns()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $storlogix = new StorlogixService($tenant);
 
         if (!$storlogix->isConfigured()) {
@@ -354,7 +353,7 @@ class WmsSyncController extends Controller
 
     public function syncStorlogixStock()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $storlogix = new StorlogixService($tenant);
 
         if (!$storlogix->isConfigured()) {
@@ -443,7 +442,7 @@ class WmsSyncController extends Controller
 
     public function syncArticlesToStorlogix()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $storlogix = new StorlogixService($tenant);
 
         if (!$storlogix->isConfigured()) {
@@ -488,7 +487,7 @@ class WmsSyncController extends Controller
 
     public function sendDeliveryOrder(int $orderId)
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $storlogix = new StorlogixService($tenant);
 
         if (!$storlogix->isConfigured()) {
@@ -531,7 +530,7 @@ class WmsSyncController extends Controller
 
     public function syncGoodsReceipts()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $storlogix = new StorlogixService($tenant);
 
         if (!$storlogix->isConfigured()) {
@@ -595,7 +594,7 @@ class WmsSyncController extends Controller
 
     public function syncStockChanges()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $storlogix = new StorlogixService($tenant);
 
         if (!$storlogix->isConfigured()) {
@@ -667,7 +666,7 @@ class WmsSyncController extends Controller
 
     public function syncOrderUpdates()
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $storlogix = new StorlogixService($tenant);
 
         if (!$storlogix->isConfigured()) {

@@ -6,14 +6,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use App\Models\Tenant;
 
 class JtlSettingsController extends Controller
 {
     public function show()
     {
         $user = auth()->user();
-        $tenant = Tenant::first();
+        $tenant = $user->tenant;
 
         $jtl = new \App\Services\JtlWawiApiService($tenant);
         $jtlConfigured = $jtl->isConfigured();
@@ -97,7 +96,7 @@ class JtlSettingsController extends Controller
             'jtl_tenant_id' => 'required|string',
         ]);
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         $tenant->update([
             'jtl_api_key'   => $request->jtl_api_key,
@@ -123,7 +122,7 @@ class JtlSettingsController extends Controller
 
     public function testApiKey(Request $request)
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         if (!$tenant->jtl_api_key || !$tenant->jtl_tenant_id) {
             return response()->json([
@@ -163,7 +162,7 @@ class JtlSettingsController extends Controller
 
         $user->save();
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $jtl = new \App\Services\JtlWawiApiService($tenant->fresh());
 
         try {
@@ -183,7 +182,7 @@ class JtlSettingsController extends Controller
 
     public function testCloud(Request $request)
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         if (!$tenant->jtl_cloud_client_id || !$tenant->jtl_cloud_tenant_id) {
             return response()->json([

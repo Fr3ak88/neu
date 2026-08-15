@@ -16,7 +16,7 @@ class SyncFbaInventoryJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 2;
-    public int $timeout = 600;
+    public int $timeout = 1800;
 
     public function __construct(
         public AmazonAccount $account

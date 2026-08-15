@@ -43,9 +43,11 @@ class RegisterController extends Controller
         ]);
 
         $user = User::create([
+            'tenant_id' => $tenant->id,
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
+            'role' => User::ROLE_FIRMENADMIN,
         ]);
 
         Auth::login($user);

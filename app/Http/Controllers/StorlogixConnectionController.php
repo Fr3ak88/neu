@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tenant;
 use App\Services\StorlogixService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +26,7 @@ class StorlogixConnectionController extends Controller
         ]);
 
         $user = $request->user();
-        $tenant = Tenant::first();
+        $tenant = $user->tenant;
 
         if (!$tenant) {
             return back()->with('error', 'Keine Firma zugeordnet.');
@@ -57,7 +56,7 @@ class StorlogixConnectionController extends Controller
             'storlogix_client_name'   => 'required|string|max:100',
         ]);
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         if (!$tenant) {
             return response()->json([

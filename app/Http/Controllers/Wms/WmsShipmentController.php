@@ -9,7 +9,6 @@ use App\Models\Wms\SyncLog;
 use App\Services\JtlWawiApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Models\Tenant;
 
 class WmsShipmentController extends Controller
 {
@@ -82,7 +81,7 @@ class WmsShipmentController extends Controller
         }
 
         try {
-            $tenant = Tenant::first();
+            $tenant = auth()->user()->tenant;
             if (!$tenant) {
                 return;
             }

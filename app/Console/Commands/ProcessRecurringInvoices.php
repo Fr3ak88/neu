@@ -12,7 +12,8 @@ class ProcessRecurringInvoices extends Command
 
     public function handle(): int
     {
-        $auftraege = RechnungAuftrag::query()
+        $auftraege = RechnungAuftrag::withoutGlobalScope('tenant')
+            ->query()
             ->where('typ', 'wiederkehrend')
             ->where('aktiv', true)
             ->where('naechste_erstellung', '<=', now()->toDateString())

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Rechnung extends Model
 {
+    use BelongsToTenant;
     protected $table = 'rechnungen';
 
     const STATUS_DRAFT      = 'draft';
@@ -27,6 +29,7 @@ class Rechnung extends Model
     ];
 
     protected $fillable = [
+        'tenant_id',
         'rechnungsnummer',
         'rechnung_auftrag_id',
         'kunde_name',
@@ -83,8 +86,7 @@ class Rechnung extends Model
                 $year = now()->format('Y');
                 $prefix = $model->ist_storno ? 'SRE' : 'RE';
 
-                $maxNum = static::withoutGlobalScopes()
-                    ->where('rechnungsnummer', 'like', $prefix . '-' . $year . '-%')
+                $maxNum = static::where('rechnungsnummer', 'like', $prefix . '-' . $year . '-%')
                     ->selectRaw("MAX(CAST(SUBSTRING(rechnungsnummer, " . (strlen($prefix) + 7) . ") AS UNSIGNED)) as max_num")
                     ->value('max_num') ?? 0;
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,7 +10,7 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = auth()->user();
-        $tenant = Tenant::first();
+        $tenant = $user->tenant;
 
         return view('settings.profile.edit', compact('user', 'tenant'));
     }
@@ -45,7 +44,7 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
 
-        $tenant = Tenant::first();
+        $tenant = $user->tenant;
 
         if (!$tenant) {
             return back()->with('error', 'Keine Firma zugeordnet.');

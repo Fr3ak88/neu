@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Rechnung;
 use App\Models\RechnungPosition;
 use App\Models\Customer;
-use App\Models\Tenant;
 use App\Services\ZugferdService;
 use App\Mail\RechnungVersendetMail;
 use Illuminate\Http\Request;
@@ -86,7 +85,7 @@ class RechnungController extends Controller
     public function create()
     {
         $customers = Customer::orderBy('name')->get();
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         return view('rechnungen.create', compact('customers', 'tenant'));
     }
@@ -161,7 +160,7 @@ class RechnungController extends Controller
     {
         $rechnung->load('positions');
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         return view('rechnungen.show', compact('rechnung', 'tenant'));
     }
@@ -172,7 +171,7 @@ class RechnungController extends Controller
 
         $rechnung->load('positions');
         $customers = Customer::orderBy('name')->get();
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         return view('rechnungen.edit', compact('rechnung', 'customers', 'tenant'));
     }
@@ -254,7 +253,7 @@ class RechnungController extends Controller
 
     public function pdf(Rechnung $rechnung)
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $service = new ZugferdService($tenant);
 
         $relativePath = $service->generatePdf($rechnung);
@@ -270,7 +269,7 @@ class RechnungController extends Controller
 
     public function pdfView(Rechnung $rechnung)
     {
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $service = new ZugferdService($tenant);
 
         $relativePath = $rechnung->pdf_path;
@@ -297,7 +296,7 @@ class RechnungController extends Controller
             return back()->with('error', 'Kein Stornobeleg vorhanden.');
         }
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $service = new ZugferdService($tenant);
 
         $relativePath = $storno->storno_pdf_path;
@@ -320,7 +319,7 @@ class RechnungController extends Controller
             return back()->with('error', 'Kein Stornobeleg vorhanden.');
         }
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
         $service = new ZugferdService($tenant);
 
         $relativePath = $storno->storno_pdf_path;
@@ -385,7 +384,7 @@ class RechnungController extends Controller
             $storno = $rechnung->createStornoBeleg();
 
             // PDF generieren
-            $tenant = Tenant::first();
+            $tenant = auth()->user()->tenant;
             $service = new ZugferdService($tenant);
             $stornoPdfPath = $service->generateStornoPdf($storno);
             $storno->update(['storno_pdf_path' => $stornoPdfPath]);
@@ -404,7 +403,7 @@ class RechnungController extends Controller
             'email' => 'required|email',
         ]);
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         Mail::to($request->email)
             ->send(new RechnungVersendetMail($rechnung, $tenant));
@@ -425,7 +424,7 @@ class RechnungController extends Controller
             'mahnung_text' => 'nullable|string',
         ]);
 
-        $tenant = Tenant::first();
+        $tenant = auth()->user()->tenant;
 
         Mail::to($request->email)
             ->send(new \App\Mail\MahnungMail($rechnung, $tenant, $request->mahnung_text));

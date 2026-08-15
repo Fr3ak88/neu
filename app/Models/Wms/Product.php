@@ -2,14 +2,17 @@
 
 namespace App\Models\Wms;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
+    use BelongsToTenant;
     protected $table = 'wms_products';
 
     protected $fillable = [
+        'tenant_id',
         'jtl_id', 'sku', 'name', 'ean',
         'quantity', 'weight', 'length', 'width', 'height',
         'price', 'status', 'last_synced_at',

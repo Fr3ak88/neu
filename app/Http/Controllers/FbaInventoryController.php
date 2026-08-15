@@ -61,12 +61,19 @@ class FbaInventoryController extends Controller
 
         if (\Schema::hasTable('inventory_sync_logs')) {
             $running = InventorySyncLog::where('amazon_account_id', $account->id)
-                ->where('status', 'running')
+                ->whereIn('status', ['pending', 'running'])
                 ->exists();
 
             if ($running) {
-                return redirect()->route('fba-inventory.index')
-                    ->with('error', 'Synchronisation läuft bereits.');
+                $stale = InventorySyncLog::where('amazon_account_id', $account->id)
+                    ->whereIn('status', ['pending', 'running'])
+                    ->where('created_at', '<', now()->subMinutes(30))
+                    ->update(['status' => 'failed', 'error_message' => 'Abgebrochen: Neue Synchronisation gestartet', 'completed_at' => now()]);
+
+                if (!$stale) {
+                    return redirect()->route('fba-inventory.index')
+                        ->with('error', 'Synchronisation läuft bereits.');
+                }
             }
 
             InventorySyncLog::create([

@@ -47,7 +47,7 @@
                 <tr>
                     <td><b>{{ $user->name }}</b></td>
                     <td class="article-sku">{{ $user->email }}</td>
-                    <td>{{ (\App\Models\Tenant::first()->company ?? '—') ?? '—' }}</td>
+                    <td>{{ ($user->tenant->company ?? '—') ?? '—' }}</td>
                     <td class="article-sku">{{ $user->created_at->format('d.m.Y H:i') }}</td>
                     <td>
                         @if($user->role === 'superadmin')

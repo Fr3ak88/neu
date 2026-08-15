@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RechnungAuftrag extends Model
 {
+    use BelongsToTenant;
     protected $table = 'rechnung_auftraege';
 
     protected static function boot(): void
@@ -59,6 +61,7 @@ class RechnungAuftrag extends Model
     ];
 
     protected $fillable = [
+        'tenant_id',
         'auftragsnummer',
         'bezeichnung',
         'typ',

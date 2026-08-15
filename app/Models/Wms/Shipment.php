@@ -2,12 +2,14 @@
 
 namespace App\Models\Wms;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shipment extends Model
 {
+    use BelongsToTenant;
     protected $table = 'wms_shipments';
 
     const STATUS_PENDING   = 'pending';
@@ -17,6 +19,7 @@ class Shipment extends Model
     const STATUS_ERROR     = 'error';
 
     protected $fillable = [
+        'tenant_id',
         'wms_order_id', 'storlogix_id', 'status',
         'tracking_number', 'tracking_url', 'carrier', 'shipping_service',
         'sscc', 'package_count', 'weight',

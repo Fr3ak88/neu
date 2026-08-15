@@ -12,7 +12,8 @@ class CheckOverdueInvoices extends Command
 
     public function handle(): int
     {
-        $updated = Rechnung::query()
+        $updated = Rechnung::withoutGlobalScope('tenant')
+            ->query()
             ->where('status', Rechnung::STATUS_VERSENDET)
             ->where('faelligkeitsdatum', '<', now()->toDateString())
             ->update(['status' => Rechnung::STATUS_UEBERFAELLIG]);

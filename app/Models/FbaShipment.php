@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class FbaShipment extends Model
 {
+    use BelongsToTenant;
     // Status-Konstanten
     const STATUS_DRAFT          = 'draft';
     const STATUS_PLAN_CREATING  = 'plan_creating';
@@ -30,6 +32,7 @@ class FbaShipment extends Model
     ];
 
     protected $fillable = [
+        'tenant_id',
         'amazon_account_id',
         'internal_ref',
         'jtl_ref',
@@ -68,8 +71,7 @@ class FbaShipment extends Model
         static::creating(function (self $model) {
             if (empty($model->internal_ref)) {
                 $year  = now()->format('Y');
-                $count = static::withoutGlobalScopes()
-                    ->whereYear('created_at', $year)
+                $count = static::whereYear('created_at', $year)
                     ->count() + 1;
                 $model->internal_ref = 'UML-' . $year . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
             }

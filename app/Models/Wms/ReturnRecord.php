@@ -2,11 +2,13 @@
 
 namespace App\Models\Wms;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ReturnRecord extends Model
 {
+    use BelongsToTenant;
     protected $table = 'wms_returns';
 
     const STATUS_RECEIVED  = 'received';
@@ -15,6 +17,7 @@ class ReturnRecord extends Model
     const STATUS_DISPOSED  = 'disposed';
 
     protected $fillable = [
+        'tenant_id',
         'wms_order_id', 'storlogix_return_id', 'return_number',
         'rma_number', 'return_advice_number',
         'reason', 'status', 'quantity', 'condition',

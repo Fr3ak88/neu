@@ -11,7 +11,7 @@ class AmazonAccountController extends Controller
 {
     public function index()
     {
-        $accounts = AmazonAccount::all();
+        $accounts = AmazonAccount::where('tenant_id', auth()->user()->tenant_id)->get();
         return view('settings.amazon-accounts.index', compact('accounts'));
     }
 

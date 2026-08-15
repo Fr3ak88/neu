@@ -2,12 +2,14 @@
 
 namespace App\Models\Wms;
 
+use App\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends Model
 {
+    use BelongsToTenant;
     protected $table = 'wms_orders';
 
     const STATUS_NEW        = 'new';
@@ -25,6 +27,7 @@ class Order extends Model
     ];
 
     protected $fillable = [
+        'tenant_id',
         'jtl_order_id', 'order_number', 'storlogix_order_number',
         'customer_name', 'customer_address', 'customer_zip', 'customer_city', 'customer_country',
         'status', 'storlogix_status', 'total_amount', 'shipping_method',

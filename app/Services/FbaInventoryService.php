@@ -42,25 +42,39 @@ class FbaInventoryService
         $allSummaries = [];
         $nextToken = null;
         $page = 0;
+        $maxRetries = 5;
 
         do {
-            $page++;
             $queryParams = $params;
             if ($nextToken) {
                 $queryParams['nextToken'] = $nextToken;
             }
 
-            $resp = Http::withHeaders([
-                'x-amz-access-token' => $token,
-                'Content-Type'       => 'application/json',
-            ])->get($baseUrl, $queryParams);
+            $retryCount = 0;
+            $resp = null;
 
-            if ($resp->status() === 429) {
-                sleep(1);
-                continue;
+            while ($retryCount <= $maxRetries) {
+                $resp = Http::withHeaders([
+                    'x-amz-access-token' => $token,
+                    'Content-Type'       => 'application/json',
+                ])->get($baseUrl, $queryParams);
+
+                if ($resp->status() === 429) {
+                    $retryCount++;
+                    if ($retryCount > $maxRetries) {
+                        throw new \Exception("Amazon SP-API Rate-Limit: {$maxRetries} Retries überschritten für Seite " . ($page + 1));
+                    }
+                    $sleepTime = min($retryCount * 2, 10);
+                    Log::warning("FBA Inventory Rate-Limit (429), Retry {$retryCount}/{$maxRetries}, warte {$sleepTime}s");
+                    sleep($sleepTime);
+                    continue;
+                }
+
+                break;
             }
 
             $resp->throw();
+            $page++;
 
             $fullResponse = $resp->json();
             $summaries = $fullResponse['payload']['inventorySummaries'] ?? [];
@@ -73,7 +87,7 @@ class FbaInventoryService
             }
 
             if ($nextToken) {
-                usleep(250000);
+                usleep(500000);
             }
 
             Log::info("FBA Inventory Seite {$page}: " . count($summaries) . " SKUs (gesamt: " . count($allSummaries) . ")");
